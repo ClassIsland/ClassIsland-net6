@@ -424,7 +424,7 @@ public partial class MainWindow : Window
             {
                 BeginStoryboard("OverlayOut");
             }
-            await request.CompletedTokenSource.CancelAsync();
+            await Task.Run(request.CompletedTokenSource.Cancel);
         }
 
         ViewModel.CurrentOverlayElement = null;
@@ -569,7 +569,7 @@ public partial class MainWindow : Window
 
         }
 
-        return nint.Zero;
+        return IntPtr.Zero;
     }
 
     private void AutoSetNotificationEffectRenderingScale()

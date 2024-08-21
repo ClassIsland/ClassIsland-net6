@@ -104,7 +104,7 @@ public class ManagementServerConnection : IManagementServerConnection
         catch (Exception exception)
         {
             Logger.LogError(exception, "命令流与集控服务器断开。");
-            await CommandListeningCallCancellationTokenSource.CancelAsync();
+            await Task.Run(CommandListeningCallCancellationTokenSource.Cancel);
             CommandConnectionAliveTimer.Stop();
             CommandListeningCall = null;
             Logger.LogInformation("尝试重新连接命令流");

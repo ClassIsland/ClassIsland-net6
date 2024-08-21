@@ -155,7 +155,7 @@ public static class NativeWindowHelper
     public static unsafe PWSTR BuildPWSTR(int bufferSize, out nint ptr)
     {
         ptr = Marshal.AllocHGlobal(bufferSize * sizeof(char));
-        return new PWSTR((char*)ptr.ToPointer());
+        return new PWSTR((char*)IntPtr.Parse(ptr.ToString()));
     }
 
     public struct StyleStruct

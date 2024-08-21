@@ -430,7 +430,6 @@ public partial class ExcelImportWindow : MyWindow
     private TimeLayoutItem? ParseTimeLayoutItem(string? text)
     {
         var baseTime = DateTime.Now.Date;
-        var baseDateOnly = new DateOnly(baseTime.Year, baseTime.Month, baseTime.Day);
 
         if (text == null) return null;
         var matches = Regex.Matches(text, "\\d+"); // 匹配数字
@@ -459,8 +458,8 @@ public partial class ExcelImportWindow : MyWindow
         // 保存结果
         var result = new TimeLayoutItem()
         {
-            StartSecond = new DateTime(baseDateOnly, new TimeOnly(h1, m1, s1)),
-            EndSecond = new DateTime(baseDateOnly, new TimeOnly(h2, m2, s2))
+            StartSecond = new DateTime(baseTime.Year, baseTime.Month, baseTime.Day, h1, m1, s1),
+            EndSecond = new DateTime(baseTime.Year, baseTime.Month, baseTime.Day, h2, m2, s2)
         };
         return result;
     }

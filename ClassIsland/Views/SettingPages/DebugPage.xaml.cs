@@ -126,7 +126,7 @@ public partial class DebugPage : SettingsPageBase
         TaskDialog.ShowDialog(new WindowInteropHelper(Window.GetWindow(this)!).Handle, new TaskDialogPage()
         {
             Heading = "测试TaskDialog",
-            EnableLinks = true,
+            //EnableLinks = true,
             SizeToContent = false,
             Icon = TaskDialogIcon.Information,
             Expander = new TaskDialogExpander(new StackTrace().ToString()),

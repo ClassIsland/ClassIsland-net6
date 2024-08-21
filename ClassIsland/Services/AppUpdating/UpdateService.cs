@@ -530,7 +530,11 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
         }
 
         await using var stream = File.OpenRead(@"./UpdateTemp/update.zip");
-        var md5 = await MD5.HashDataAsync(stream);
+        byte[] streamBytes = new byte[stream.Length];
+        stream.Read(streamBytes, 0, streamBytes.Length);
+        stream.Seek(0, SeekOrigin.Begin);
+
+        var md5 = MD5.HashData(streamBytes);
         var str = BitConverter.ToString(md5);
         str = str.Replace("-", "");
         Logger.LogDebug("更新文件哈希：{}", str);

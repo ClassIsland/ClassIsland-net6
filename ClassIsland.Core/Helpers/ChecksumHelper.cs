@@ -51,7 +51,11 @@ public static class ChecksumHelper
     public static bool CheckChecksum(string filePath, string checksum)
     {
         var stream = File.OpenRead(filePath);
-        var md5 = MD5.HashData(stream);
+        byte[] streamBytes = new byte[stream.Length];
+        stream.Read(streamBytes, 0, streamBytes.Length);
+        stream.Seek(0, SeekOrigin.Begin);
+
+        var md5 = MD5.HashData(streamBytes);
         var md5Hex = Convert.ToHexString(md5);
         stream.Close();
         return string.Compare(checksum, md5Hex, StringComparison.CurrentCultureIgnoreCase) == 0;

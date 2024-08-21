@@ -14,7 +14,7 @@ public class ConsoleService
     public static void InitializeConsole()
     {
 #if DEBUG
-        if (ConsoleHWnd == nint.Zero)
+        if (ConsoleHWnd == IntPtr.Zero)
         {
             AllocConsole();
         }

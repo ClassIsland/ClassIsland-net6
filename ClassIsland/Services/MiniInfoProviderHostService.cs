@@ -30,7 +30,7 @@ public class MiniInfoProviderHostService : IHostedService
     {
         var guid = provider.ProviderGuid.ToString();
         Logger.LogInformation("注册快速信息提供方：{}（{}）", guid, provider.Name);
-        if (!Settings.MiniInfoProviderSettings.Keys.Contains(guid))
+        if (!Settings.MiniInfoProviderSettings.ContainsKey(guid))
         {
             Settings.MiniInfoProviderSettings[guid] = null;
         }
