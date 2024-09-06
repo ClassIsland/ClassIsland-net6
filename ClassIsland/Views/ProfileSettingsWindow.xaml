@@ -110,7 +110,7 @@
         <!-- 时间节点编辑 -->
         <ScrollViewer x:Key="TimePointEditor" Width="332" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="16">
-                <TextBlock Text="Obslated."/>
+                <TextBlock Text="Obsolete."/>
             </StackPanel>
         </ScrollViewer>
 
@@ -323,6 +323,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0">
                     <TextBlock Text="当前启用的课表" Style="{StaticResource MaterialDesignHeadline5TextBlock}"/>
@@ -394,6 +395,33 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                <StackPanel Grid.Row="2">
+                    <Separator Margin="0 16 0 4" />
+                    <controls1:IconText Kind="CalendarOutline" Text="多周轮换偏移" Margin="0 0 0 8" />
+                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                            HorizontalAlignment="Left"
+                            Click="ButtonOpenWeekOffsetSettings_OnClick">
+                        <ci:IconText Kind="CalendarMultiple" Text="调整多周轮换偏移…"/>
+                    </Button>
+                </StackPanel>
+                <materialDesign:PopupEx Grid.Row="2"
+                                        AllowsTransparency="True"
+                                        StaysOpen="False"
+                                        Placement="Mouse"
+                                        IsOpen="{Binding ViewModel.IsWeekOffsetSettingsOpen}"
+                                        PopupAnimation="Fade">
+                    <Border Background="{DynamicResource MaterialDesignPaper}"
+                            Margin="8"
+                            Button.Click="ButtonWeekOffsetSettingsButtons_OnClick">
+                        <Border.Effect>
+                            <DropShadowEffect Direction="0"
+                                              ShadowDepth="0"
+                                              BlurRadius="8"
+                                              Opacity="0.5"/>
+                        </Border.Effect>
+                        <controls:WeekOffsetSettingsControl/>
+                    </Border>
+                </materialDesign:PopupEx>
             </Grid>
         </Grid>
 
@@ -596,7 +624,8 @@
                                         materialDesign:HintAssist.Hint="失效日期"
                                         SelectedDate="{Binding ProfileService.Profile.TempClassPlanGroupExpireTime}"
                                         Style="{StaticResource MaterialDesignFloatingHintDatePicker}"
-                                        Margin="2 0 0 0" />
+                                        Margin="2 0 0 0"
+                                        DisplayDateStart="{Binding ProfileService.Profile.TempClassPlanGroupExpireTime}"/>
                             <ComboBox Grid.Column="3" Style="{StaticResource MaterialDesignFloatingHintComboBox}"
                                       SelectedIndex="{Binding ProfileService.Profile.TempClassPlanGroupType, Converter={StaticResource TempClassPlanGroupTypeToIntConverter}}"
                                       VerticalAlignment="Center"
@@ -1195,6 +1224,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     <!-- 时间表操作 -->
                                     <ToolBar Grid.Row="0" ToolBarTray.IsLocked="True" IsEnabled="{Binding ManagementService.Policy.DisableProfileTimeLayoutEditing, Converter={StaticResource InvertBooleanConverter}}">
@@ -1238,6 +1268,31 @@
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
                                     </ListBox>
+
+                                    <!-- 时间点时长 -->
+                                    <materialDesign:Card HorizontalAlignment="Stretch"
+                                                         VerticalAlignment="Center"
+                                                         Foreground="{DynamicResource MaterialDesignBody}"
+                                                         Padding="12 10 12 10"
+                                                         Grid.Row="3" Margin="8 8 6 8"
+                                                         IsEnabled="{Binding ManagementService.Policy.DisableProfileTimeLayoutEditing, Converter={StaticResource InvertBooleanConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType=local:ProfileSettingsWindow}}">
+                                        <StackPanel>
+                                            <controls1:NumbericTextBox
+                                                MaxValue="36000" MinValue="0" HorizontalAlignment="Stretch"
+                                                materialDesign:TextFieldAssist.SuffixText="分钟"
+                                                Foreground="{DynamicResource MaterialDesignBody}"
+                                                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                                materialDesign:HintAssist.Hint="默认上课时间点时长"
+                                                Text="{Binding MainViewModel.Settings.DefaultOnClassTimePointMinutes, Mode=TwoWay, Converter={StaticResource IntToStringConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                                            <controls1:NumbericTextBox
+                                                MaxValue="36000" MinValue="0" HorizontalAlignment="Stretch"
+                                                materialDesign:TextFieldAssist.SuffixText="分钟"
+                                                Foreground="{DynamicResource MaterialDesignBody}"
+                                                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                                materialDesign:HintAssist.Hint="默认课间时间点时长"
+                                                Text="{Binding MainViewModel.Settings.DefaultBreakingTimePointMinutes, Mode=TwoWay, Converter={StaticResource IntToStringConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+                                    </materialDesign:Card>
                                 </Grid>
 
                                 <GridSplitter HorizontalAlignment="Stretch" Grid.Column="1"/>
@@ -1960,7 +2015,7 @@
                                     Icon="{materialDesign:PackIcon FileDocumentOutline}"
                                     Click="ButtonProfileManage_OnClick"
                                     IsEnabled="{Binding ViewModel.IsOfflineEditor, Converter={StaticResource BooleanToBooleanReConverter}, Mode=OneWay}">
-                                    <TextBlock>
+                                    <TextBlock MaxWidth="150" TextWrapping="Wrap">
                                         <Run Text="{Binding ProfileService.CurrentProfilePath}"/>
                                     </TextBlock>
                                 </materialDesign:Chip>
@@ -2006,7 +2061,7 @@
                                             <Setter Property="Icon" Value="{materialDesign:PackIcon FileDocumentMultipleOutline}"/>
                                         </Style>
                                     </materialDesign:Chip.Style>
-                                    <TextBlock FontFamily="{StaticResource HarmonyOsSans}">
+                                    <TextBlock FontFamily="{StaticResource HarmonyOsSans}" MaxWidth="170" TextWrapping="Wrap">
                                         <Run>
                                             <Run.Style>
                                                 <Style TargetType="Run">
@@ -2030,7 +2085,7 @@
                                     Icon="{materialDesign:PackIcon Group}"
                                     Click="ButtonClassPlansGroup_OnClick"
                                     IsEnabled="{Binding ViewModel.IsOfflineEditor, Converter={StaticResource BooleanToBooleanReConverter}, Mode=OneWay}">
-                                    <TextBlock>
+                                    <TextBlock MaxWidth="170" TextWrapping="Wrap">
                                         <TextBlock.DataContext>
                                             <MultiBinding Converter="{StaticResource ClassPlanGroupIdToClassPlanGroupConverter}">
                                                 <Binding Path="ProfileService.Profile.ClassPlanGroups"/>
@@ -2098,7 +2153,8 @@
                                 <materialDesign:Chip
                                     ToolTip="查看档案编辑帮助。"
                                     Icon="{materialDesign:PackIcon Help}"
-                                    Click="ButtonHelp_OnClick"
+                                    Command="{x:Static ci:UriNavigationCommands.UriNavigationCommand}"
+                                    CommandParameter="https://docs.classisland.tech/zh-cn/latest/app/profile-settings-page/"
                                     IsEnabled="{Binding ViewModel.IsOfflineEditor, Converter={StaticResource BooleanToBooleanReConverter}, Mode=OneWay}">
                                     <TextBlock>
                                         <Run Text="帮助"/>

@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageTags>classisland</PackageTags>
     <Description>ClassIsland 的核心共享库。</Description>
+	  <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +28,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
   </ItemGroup>
+
+	<ItemGroup Condition="$(TargetFramework)=='net472'">
+		<PackageReference Include="System.Text.Json" Version="8.0.4" />
+	</ItemGroup>
 
   <ItemGroup>
     <Protobuf Include="Protobuf\Service\*.proto" />

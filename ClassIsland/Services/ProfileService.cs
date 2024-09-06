@@ -17,6 +17,8 @@ using static ClassIsland.Shared.Helpers.ConfigureFileHelper;
 
 using Path = System.IO.Path;
 using System.Windows.Input;
+using ClassIsland.Shared.IPC.Abstractions.Services;
+using dotnetCampus.Ipc.CompilerServices.GeneratedProxies;
 using Sentry;
 
 namespace ClassIsland.Services;
@@ -47,14 +49,17 @@ public class ProfileService : IProfileService
     private ILogger<ProfileService> Logger { get; }
 
     private IManagementService ManagementService { get; }
+    public IIpcService IpcService { get; }
 
     private bool _isProfileLoaded = false;
 
-    public ProfileService(SettingsService settingsService, ILogger<ProfileService> logger, IManagementService managementService)
+    public ProfileService(SettingsService settingsService, ILogger<ProfileService> logger, IManagementService managementService, IIpcService ipcService)
     {
         Logger = logger;
         ManagementService = managementService;
+        IpcService = ipcService;
         SettingsService = settingsService;
+        IpcService.IpcProvider.CreateIpcJoint<IPublicProfileService>(this);
         if (!Directory.Exists("./Profiles"))
         {
             Directory.CreateDirectory("./Profiles");
@@ -236,25 +241,10 @@ public class ProfileService : IProfileService
         }
     }
 
-    public bool CheckClassPlan(ClassPlan plan)
-    {
-        if (plan.TimeRule.WeekDay != (int)DateTime.Now.DayOfWeek)
-        {
-            return false;
-        }
-
-        if (plan.TimeRule.WeekCountDiv == 0)
-            return true;
-
-        var ExactTimeService = App.GetService<IExactTimeService>();
-        var Settings = App.GetService<SettingsService>().Settings;
-
-        var dd = Math.Abs((ExactTimeService.GetCurrentLocalDateTime().Date - Settings.SingleWeekStartTime.Date).TotalDays);
-        var dw = Math.Floor(dd / 7) + 1;
-        var w = (int)dw % plan.TimeRule.WeekCountDivTotal;
-        return (plan.TimeRule.WeekCountDiv == w ||
-                plan.TimeRule.WeekCountDiv == plan.TimeRule.WeekCountDivTotal && w == 0);
-    }
+    //[Obsolete]
+    //public bool CheckClassPlan(ClassPlan plan)
+    //{
+    //}
 
     public void ConvertToStdClassPlan()
     {
@@ -292,7 +282,7 @@ public class ProfileService : IProfileService
 
             dayOffset = Math.Max(finalOffset, dayOffset);
         }
-        expireTime ??= DateTime.Now + TimeSpan.FromDays(dayOffset);
+        expireTime ??= App.GetService<IExactTimeService>().GetCurrentLocalDateTime().Date + TimeSpan.FromDays(dayOffset);
 
         Profile.TempClassPlanGroupExpireTime = expireTime.Value;
         Profile.TempClassPlanGroupId = key;

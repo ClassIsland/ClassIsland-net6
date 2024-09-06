@@ -602,7 +602,10 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <controls:ComponentPresenter Settings="{Binding}"
+                                            <controls:ComponentPresenter IsOnMainWindow="True" 
+                                                                         Settings="{Binding}"
+                                                                         HideOnRule="{Binding HideOnRule, Mode=OneWay}"
+                                                                         HidingRules="{Binding HidingRules, Mode=OneWay}"
                                                                          Margin="6 0" />
                                         </Grid>
                                     </DataTemplate>
