@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0-windows7.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Title>ClassIsland Plugin SDK</Title>
+	</PropertyGroup>
+
+	<PropertyGroup>
+	  <PackageTags>classisland;plugin;addin;wpf;material design</PackageTags>
+	  <Description>用于开发应用 ClassIsland 插件的 SDK。</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ClassIsland.Core\ClassIsland.Core.csproj" IncludeAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Properties\" />
+	</ItemGroup>
+	
+	<Import Project="..\GeneratePackage.props" />
+	<Import Project="..\Global.props" />
+	<ItemGroup>
+	  <PackageReference Update="GitInfo" Version="3.3.5">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
+</Project>
