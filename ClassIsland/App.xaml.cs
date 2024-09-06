@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Diagnostics;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
@@ -63,6 +64,7 @@ using ClassIsland.Models.Rules;
 using ClassIsland.Controls.RuleSettingsControls;
 using ClassIsland.Shared.IPC.Abstractions.Services;
 using dotnetCampus.Ipc.CompilerServices.GeneratedProxies;
+using ControlzEx.Native;
 
 namespace ClassIsland;
 /// <summary>
@@ -94,6 +96,7 @@ public partial class App : AppBase, IAppHost
 
     public App()
     {
+        AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
     }
 
     static App()
@@ -122,24 +125,35 @@ public partial class App : AppBase, IAppHost
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         e.Handled = true;
-        if (CrashWindow != null)
-        {
-            CrashWindow = null;
-            GC.Collect();
-        }
-        Logger?.LogCritical(e.Exception, "发生严重错误。");
-        //Settings.DiagnosticCrashCount++;
-        //Settings.DiagnosticLastCrashTime = DateTime.Now;
-        CrashWindow = new CrashWindow()
-        {
-            CrashInfo = e.Exception.ToString()
-        };
+
 #if DEBUG
         if (e.Exception.GetType() == typeof(ResourceReferenceKeyNotFoundException))
         {
             return;
         }
 #endif
+
+        if (Settings.IsCriticalSafeMode) // 教学安全模式
+        {
+            Logger?.LogCritical(e.Exception, "发生严重错误（应用被教学安全模式退出）");
+            // TODO: 保存错误日志
+            AppBase.Current.Stop();
+            return;
+        }
+
+        Logger?.LogCritical(e.Exception, "发生严重错误。");
+
+        if (CrashWindow != null)
+        {
+            CrashWindow = null;
+            GC.Collect();
+        }
+        //Settings.DiagnosticCrashCount++;
+        //Settings.DiagnosticLastCrashTime = DateTime.Now;
+        CrashWindow = new CrashWindow()
+        {
+            CrashInfo = e.Exception.ToString()
+        };
         SentrySdk.CaptureException(e.Exception, scope =>
         {
             scope.Level = SentryLevel.Fatal;    
@@ -171,8 +185,8 @@ public partial class App : AppBase, IAppHost
 
         BindingDiagnostics.BindingFailed += BindingDiagnosticsOnBindingFailed;
 
-        Thread.CurrentThread.CurrentUICulture = new CultureInfo("zh-Hans-CN");
-        Thread.CurrentThread.CurrentCulture = new CultureInfo("zh-Hans-CN");
+        Thread.CurrentThread.CurrentUICulture = new CultureInfo("zh-CN");
+        Thread.CurrentThread.CurrentCulture = new CultureInfo("zh-CN");
         FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement), new FrameworkPropertyMetadata(System.Windows.Markup.XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.IetfLanguageTag)));
 
         // 检测Mutex
@@ -195,11 +209,8 @@ public partial class App : AppBase, IAppHost
         }
 
         // 检测桌面文件夹
-        if (!ApplicationCommand.Quiet &&
-            Settings.DirectoryIsDesktopShowed != Environment.UserName &&
-            Environment.CurrentDirectory == Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory))
+        if (!Settings.IsWelcomeWindowShowed && Environment.CurrentDirectory == Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory))
         {
-            Settings.DirectoryIsDesktopShowed = Environment.UserName;
             DirectoryIsDesktop();
         }
 
@@ -341,6 +352,7 @@ public partial class App : AppBase, IAppHost
                 services.AddSettingsPage<AboutSettingsPage>();
                 // 主界面组件
                 services.AddComponent<TextComponent, TextComponentSettingsControl>();
+                services.AddComponent<SeparatorComponent>();
                 services.AddComponent<LegacyScheduleComponent>();
                 services.AddComponent<ScheduleComponent, ScheduleComponentSettingsControl>();
                 services.AddComponent<DateComponent>();
@@ -419,13 +431,16 @@ public partial class App : AppBase, IAppHost
         //OverrideFocusVisualStyle();
         Logger.LogInformation("初始化应用。");
 
+        TransitionAssist.DisableTransitionsProperty.OverrideMetadata(typeof(FrameworkElement), new FrameworkPropertyMetadata(Settings.IsTransientDisabled));
+        IThemeService.IsTransientDisabled = Settings.IsTransientDisabled;
+        IThemeService.IsWaitForTransientDisabled = Settings.IsWaitForTransientDisabled;
         if (Settings.IsSplashEnabled && !ApplicationCommand.Quiet)
         {
             var spanShowSplash = spanLaunching.StartChild("startup-show-splash");
             GetService<SplashWindow>().Show();
             GetService<ISplashService>().CurrentProgress = 25;
             var b = false;
-            while (!b)
+            while (!b && !IThemeService.IsWaitForTransientDisabled)
             {
                 Dispatcher.Invoke(DispatcherPriority.Background, () =>
                 {
@@ -621,6 +636,7 @@ public partial class App : AppBase, IAppHost
                              "Settings.json.bak",
                              @".\Profiles",
                              @".\Config",
+                             @".\Backups",
                              @".\Temp",
                              @".\Cache"
                          })

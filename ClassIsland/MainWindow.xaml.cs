@@ -335,6 +335,7 @@ public partial class MainWindow : Window
             ViewModel.IsNotificationWindowExplicitShowed = settings.IsNotificationTopmostEnabled && ViewModel.Settings.AllowNotificationTopmost;
             if (ViewModel.IsNotificationWindowExplicitShowed && ViewModel.Settings.WindowLayer == 0)  // 如果处于置底状态，还需要激活窗口来强制显示窗口。
             {
+                UpdateWindowLayer();
                 Activate();
             }
 
@@ -427,8 +428,8 @@ public partial class MainWindow : Window
         {
             ViewModel.IsNotificationWindowExplicitShowed = false;
             SetBottom();
+            UpdateWindowLayer();
         }
-        UpdateTheme();
     }
 
     protected override void OnContentRendered(EventArgs e)
@@ -712,15 +713,7 @@ public partial class MainWindow : Window
             var r = SetWindowLong(hWnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, style);
         }
 
-        switch (ViewModel.Settings.WindowLayer)
-        {
-            case 0: // bottom
-                Topmost = ViewModel.IsNotificationWindowExplicitShowed;
-                break;
-            case 1:
-                Topmost = true;
-                break;
-        }
+        UpdateWindowLayer();
 
         var primary = Colors.DodgerBlue;
         var secondary = Colors.DodgerBlue;
@@ -774,6 +767,19 @@ public partial class MainWindow : Window
             }
             ResourceLoaderBorder.SetValue(ForegroundProperty, DependencyProperty.UnsetValue);
             ResourceLoaderBorder.SetValue(TextElement.ForegroundProperty, DependencyProperty.UnsetValue);
+        }
+    }
+
+    private void UpdateWindowLayer()
+    {
+        switch (ViewModel.Settings.WindowLayer)
+        {
+            case 0: // bottom
+                Topmost = ViewModel.IsNotificationWindowExplicitShowed;
+                break;
+            case 1:
+                Topmost = true;
+                break;
         }
     }
 
@@ -1020,7 +1026,14 @@ public partial class MainWindow : Window
 
     private void OpenClassSwapWindow()
     {
-        if (LessonsService.CurrentClassPlan == null || ClassChangingWindow != null)
+        if (LessonsService.CurrentClassPlan == null) // （仅换课快捷方式）如果今天没有课程，则选择临时课表
+        {
+            App.GetService<ProfileSettingsWindow>().OpenDrawer("TemporaryClassPlan");
+            OpenProfileSettingsWindow();
+            return;
+        }
+
+        if (ClassChangingWindow != null)
         {
             return;
         }

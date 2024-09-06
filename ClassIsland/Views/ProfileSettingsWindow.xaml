@@ -60,7 +60,7 @@
                         <ContentPresenter>
                             <ContentPresenter.ContentTemplate>
                                 <DataTemplate DataType="{x:Type profile:Subject}">
-                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding Name, Mode=OneWay}"/>
                                 </DataTemplate>
                             </ContentPresenter.ContentTemplate>
                             <ContentPresenter.Content>
@@ -624,8 +624,7 @@
                                         materialDesign:HintAssist.Hint="失效日期"
                                         SelectedDate="{Binding ProfileService.Profile.TempClassPlanGroupExpireTime}"
                                         Style="{StaticResource MaterialDesignFloatingHintDatePicker}"
-                                        Margin="2 0 0 0"
-                                        DisplayDateStart="{Binding ProfileService.Profile.TempClassPlanGroupExpireTime}"/>
+                                        Margin="2 0 0 0"/>
                             <ComboBox Grid.Column="3" Style="{StaticResource MaterialDesignFloatingHintComboBox}"
                                       SelectedIndex="{Binding ProfileService.Profile.TempClassPlanGroupType, Converter={StaticResource TempClassPlanGroupTypeToIntConverter}}"
                                       VerticalAlignment="Center"
@@ -1066,10 +1065,10 @@
                                                             <DataTemplate>
                                                                 <TextBlock>
                                                                     <Run
-                                                                        Text="{Binding CurrentTimeLayoutItem.StartSecond, StringFormat={}{0:HH:mm:ss}}" />
+                                                                        Text="{Binding CurrentTimeLayoutItem.StartSecond, StringFormat={}{0:HH:mm:ss}, Mode=OneWay}" />
                                                                     <Run Text="-" />
                                                                     <Run
-                                                                        Text="{Binding CurrentTimeLayoutItem.EndSecond, StringFormat={}{0:HH:mm:ss}}" />
+                                                                        Text="{Binding CurrentTimeLayoutItem.EndSecond, StringFormat={}{0:HH:mm:ss}, Mode=OneWay}" />
                                                                 </TextBlock>
                                                             </DataTemplate>
                                                         </DataGridTemplateColumn.CellTemplate>
@@ -1159,9 +1158,9 @@
                                                         </StackPanel>
                                                     </Grid>
                                                 </TabItem>
-                                                <TabItem Header="附加设置结果">
-
-                                                </TabItem>
+                                                <!--<TabItem Header="附加设置结果">
+                                                    未实现
+                                                </TabItem>-->
                                             </TabControl>
 
                                             <StackPanel Grid.Column="2" 

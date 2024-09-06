@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
+using Windows.Win32;
 using ClassIsland.Core.Abstractions.Services;
+using ClassIsland.Core.Helpers.Native;
 using ClassIsland.Core.Models.Plugin;
 using ClassIsland.Core.Models.Ruleset;
 using ClassIsland.Core.Models.Weather;
@@ -21,12 +25,13 @@ using ClassIsland.Services.AppUpdating;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using Microsoft.Extensions.Logging;
-
+using Microsoft.Win32;
 using Octokit;
 
 using WindowsShortcutFactory;
 
 using File = System.IO.File;
+using System.Runtime.InteropServices;
 
 namespace ClassIsland.Models;
 
@@ -156,7 +161,6 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
     private Version _lastAppVersion = new Version("0.0.0.0");
     private bool _showComponentsMigrateTip = false;
     private bool _expAllowEditingActivatedTimeLayout = false;
-    private string _directoryIsDesktopShowed = "";
     private ObservableDictionary<string, string> _pluginIndexSelectedMirrors = new();
     private ObservableCollection<string> _userPluginIndexes = new();
     private ObservableDictionary<string, string> _additionalPluginIndexes = new();
@@ -192,6 +196,12 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
     private bool _isErrorLoadingRawInput = false;
     private bool _isCustomForegroundColorEnabled = false;
     private Color _customForegroundColor = Colors.DodgerBlue;
+    private bool _isPluginMarketWarningVisible = true;
+    private bool _isTransientDisabled = false;
+    private bool _isWaitForTransientDisabled = false;
+    private bool _isCriticalSafeMode = false;
+    private bool _showCurrentLessonOnlyOnClass = false;
+    private bool _isSwapMode = true;
 
     public void NotifyPropertyChanged(string propertyName)
     {
@@ -227,17 +237,6 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         {
             if (value == _isWelcomeWindowShowed) return;
             _isWelcomeWindowShowed = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string DirectoryIsDesktopShowed
-    {
-        get => _directoryIsDesktopShowed;
-        set
-        {
-            if (value == _directoryIsDesktopShowed) return;
-            _directoryIsDesktopShowed = value;
             OnPropertyChanged();
         }
     }
@@ -473,7 +472,12 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         {
             try
             {
-                Environment.SetEnvironmentVariable("ClassIsland_IsSentryEnabled", value ? "1" : "0");
+                var envVar = value ? "1" : "0";
+                Environment.SetEnvironmentVariable("ClassIsland_IsSentryEnabled", envVar);
+                // 因为 Environment.SetEnvironmentVariable 有时会执行很长时间，所以这里要直接修改注册表。
+                using var reg = Registry.CurrentUser.OpenSubKey(
+                    @"Environment", true);
+                reg?.SetValue("ClassIsland_IsSentryEnabled", envVar, RegistryValueKind.String);
                 OnPropertyChanged();
             }
             catch (Exception ex)
@@ -563,6 +567,17 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         {
             if (value == _countdownSeconds) return;
             _countdownSeconds = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowCurrentLessonOnlyOnClass
+    {
+        get => _showCurrentLessonOnlyOnClass;
+        set
+        {
+            if (value == _showCurrentLessonOnlyOnClass) return;
+            _showCurrentLessonOnlyOnClass = value;
             OnPropertyChanged();
         }
     }
@@ -684,6 +699,39 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         {
             if (value.Equals(_lastTimeAdjustDateTime)) return;
             _lastTimeAdjustDateTime = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsTransientDisabled
+    {
+        get => _isTransientDisabled;
+        set
+        {
+            if (value == _isTransientDisabled) return;
+            _isTransientDisabled = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsWaitForTransientDisabled
+    {
+        get => _isWaitForTransientDisabled;
+        set
+        {
+            if (value == _isWaitForTransientDisabled) return;
+            _isWaitForTransientDisabled = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsCriticalSafeMode
+    {
+        get => _isCriticalSafeMode;
+        set
+        {
+            if (value == _isCriticalSafeMode) return;
+            _isCriticalSafeMode = value;
             OnPropertyChanged();
         }
     }
@@ -1837,6 +1885,17 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         }
     }
 
+    public bool IsPluginMarketWarningVisible
+    {
+        get => _isPluginMarketWarningVisible;
+        set
+        {
+            if (value == _isPluginMarketWarningVisible) return;
+            _isPluginMarketWarningVisible = value;
+            OnPropertyChanged();
+        }
+    }
+
     #endregion
     public bool IsDebugEnabled
     {
@@ -1969,4 +2028,15 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
             OnPropertyChanged();
         }
     }
+    public bool IsSwapMode
+    {
+        get => _isSwapMode;
+        set
+        {
+            if (value == _isSwapMode) return;
+            _isSwapMode = value;
+            OnPropertyChanged();
+        }
+    }
+
 }

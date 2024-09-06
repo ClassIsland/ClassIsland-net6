@@ -7,10 +7,12 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ClassIsland;
+using ClassIsland.Services;
 using ClassIsland.Shared.IPC;
 using ClassIsland.Shared.IPC.Abstractions.Services;
 using dotnetCampus.Ipc.CompilerServices.GeneratedProxies;
 using Sentry;
+using NAudio;
 
 Thread.CurrentThread.SetApartmentState(ApartmentState.Unknown);
 Thread.CurrentThread.SetApartmentState(ApartmentState.STA);
@@ -59,7 +61,7 @@ void ConfigureSentry(SentryOptions options)
     // A Sentry Data Source Name (DSN) is required.
     // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
     // You can set it in the SENTRY_DSN environment variable, or you can set it in code here.
-    options.Dsn = "http://16f66314173eb09592b08a5ee80f7352@110.40.26.143:9000/2";
+    options.Dsn = "https://16f66314173eb09592b08a5ee80f7352@sentry.classisland.tech/2";
     // When debug is enabled, the Sentry client will emit detailed debugging information to the console.
     // This might be helpful, or might interfere with the normal operation of your application.
     // We enable it here for demonstration purposes when first trying Sentry.
@@ -84,16 +86,18 @@ void ConfigureSentry(SentryOptions options)
 
     options.AutoSessionTracking = true;
     options.ExperimentalMetrics = new ExperimentalMetricsOptions { EnableCodeLocations = true };
-    options.SetBeforeSend(@event =>
-    {
-        @event.SetTag("assetsTrimmed", App.IsAssetsTrimmedInternal.ToString());
-        return @event;
-    });
 }
 
 if (Environment.GetEnvironmentVariable("ClassIsland_IsSentryEnabled") is "1" or null )
 {
     SentrySdk.Init(ConfigureSentry);
+    DiagnosticService.GetDeviceInfo(out var name, out var vendor);
+    SentrySdk.ConfigureScope(s =>
+    {
+        s.SetTag("assetsTrimmed", App.IsAssetsTrimmedInternal.ToString());
+        s.SetTag("deviceDesktop.name", name);
+        s.SetTag("deviceDesktop.vendor", vendor);
+    });
 }
 var app = new App()
 {

@@ -40,11 +40,11 @@
                                                            IsOn="{Binding SettingsService.Settings.IsAutoStartEnabled, Mode=TwoWay}" />
             <!-- 注册 Url 协议 -->
             <controls1:SettingsCard IconGlyph="Code" Header="注册 Url 协议"
-                                    Description="注册 Url 协议后，可以从外部通过 classisland:// 协议调用本应用内的功能。"
+                                    Description="允许第三方应用或网页通过 Url 协议 classisland:// 调用本应用的部分功能，详见帮助文档。"
                                     IsOn="{Binding SettingsService.Settings.IsUrlProtocolRegistered, Mode=TwoWay}" />
             <!-- 学期开始时间 -->
             <controls1:SettingsCard IconGlyph="CalendarOutline" Header="学期开始时间"
-                                    Description="此时间将作为学期的第一天，用于应用对多周轮换课表的计算，应设为一周的第一天。">
+                                    Description="此时间将作为学期的第一天，用于多周轮换课表的计算。应设为一周的第一天。">
                 <controls1:SettingsCard.Switcher>
                     <StackPanel Orientation="Horizontal">
                         <DatePicker SelectedDate="{Binding SettingsService.Settings.SingleWeekStartTime}"
@@ -118,7 +118,7 @@
             <!-- 点击托盘图标行为 -->
             <controls1:SettingsCard IconGlyph="CursorDefaultClickOutline"
                                                            Header="点击托盘图标行为"
-                                                           Description="鼠标左键点击本应用托盘图标时应用进行的操作。无论此设置设置为什么选项，右键点击/触屏长按托盘图标仍会打开主菜单。"
+                                                           Description="鼠标左键点击/触屏单击本应用托盘图标时进行的操作。无论此设置处于何种选项，鼠标右键点击/触屏长按托盘图标总是会打开主菜单。"
                                                            IsOn="{Binding SettingsService.Settings.ShowExtraInfoOnTimePoint, Mode=TwoWay}">
                 <controls1:SettingsCard.Switcher>
                     <ComboBox Foreground="{DynamicResource MaterialDesignBody}"
@@ -184,15 +184,27 @@
                         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal"
                                                             Margin="0 4 0 0" HorizontalAlignment="Right"
                                                             VerticalAlignment="Center">
-                            <TextBox MinWidth="200" MaxWidth="250"
+                            <TextBox MinWidth="200" MaxWidth="300"
                                                              Text="{Binding SettingsService.Settings.SplashCustomText}"
                                                              VerticalAlignment="Center" />
                         </StackPanel>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
-                                                           Margin="0 6 0 0"
-                                                           Text="自定义启动界面功能已被您所在的组织禁用。" Foreground="IndianRed" TextWrapping="Wrap"
-                                                           Visibility="{Binding ManagementService.Policy.DisableSplashCustomize, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <materialDesign:ColorZone Grid.Row="2"
+                                                  Grid.Column="0" Grid.ColumnSpan="2"
+                                                  Background="#22FF0000"
+                                                  Margin="0 6 0 0"
+                                                  Visibility="{Binding ManagementService.Policy.DisableSplashCustomize, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid TextElement.FontSize="13">
+                                <DockPanel Margin="8 4 4 4">
+                                    <materialDesign:PackIcon Kind="Forbid"
+                                                             Margin="0 0 4 0"
+                                                             VerticalAlignment="Center"/>
+                                    <TextBlock Text="自定义启动界面功能已被您所在的组织禁用。"
+                                               TextWrapping="Wrap"
+                                               VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </Grid>
+                        </materialDesign:ColorZone>
                     </Grid>
                 </Expander>
             </materialDesign:Card>
@@ -208,7 +220,7 @@
                         <controls1:SettingsControl IconGlyph="TimerSyncOutline"
                                                                           Foreground="{DynamicResource MaterialDesignBody}"
                                                                           Header="使用精确时间"
-                                                                          Description="启用后，应用将自动从指定的服务器上同步精确时间。此设置不影响系统时间。"
+                                                                          Description="启用后，应用将使用从指定服务器同步的精确时间，而不是使用系统时间。"
                                                                           IsOn="{Binding SettingsService.Settings.IsExactTimeEnabled, Mode=TwoWay}"
                                                                           Margin="-12 0" />
                     </Expander.Header>
@@ -261,7 +273,7 @@
                         <controls1:SettingsControl IconGlyph="ClockArrow"
                                                                           Header="时间偏移"
                                                                           Foreground="{DynamicResource MaterialDesignBody}"
-                                                                          Description="设定应用内时间与系统时间的偏移值。如果您需要更精确地同步时间，建议您同时开启【使用精确时间】选项。"
+                                                                          Description="设定课程时间与实际时间的偏移值。如果您需要更精确地同步时间，建议您同时开启【使用精确时间】选项。"
                                                                           IsOn="{Binding SettingsService.Settings.IsExactTimeEnabled, Mode=TwoWay}"
                                                                           Margin="-12 0">
                             <controls1:SettingsControl.Switcher>
@@ -277,7 +289,7 @@
                     <StackPanel Margin="36 0 48 12">
                         <!-- 自动时间偏移 -->
                         <controls1:SettingsControl IconGlyph="ClockAutoOutline" Header="自动时间偏移"
-                                                                       Description="若启用，每天自动以设定的增量值调整时间偏移量">
+                                                                       Description="若启用，每天自动以设定的增量值调整时间偏移量。">
                             <controls1:SettingsControl.Switcher>
                                 <DockPanel Width="150">
                                     <ToggleButton DockPanel.Dock="Right"
@@ -330,6 +342,26 @@
                             Click="ButtonCloseMigrationTip_OnClick"/>
                 </Grid>
             </Border>
+            <Separator Margin="0 16 0 8" />
+            <controls1:IconText Kind="CogOutline" Text="高级" Margin="0 0 0 8" />
+            <!-- 禁用过渡动画 -->
+            <controls1:SettingsCard IconGlyph="AnimationPlayOutline"
+                                   Header="禁用过渡动画"
+                                   Description="此选项将禁用部分控件的过渡动画，以提升性能和操作效率。"
+                                   IsOn="{Binding SettingsService.Settings.IsTransientDisabled, Mode=TwoWay}"
+                                   Margin="0 0 0 6" />
+            <!-- 禁用动画等待 -->
+            <controls1:SettingsCard IconGlyph="TimerAlertOutline"
+                                    Header="禁用动画等待"
+                                    Description="默认情况下 ClassIsland 在进行阻塞 UI 线程的操作时，会确保动画播放完成。启用此选项后将不会等待动画播放完成，可以一定程度上地提升加载速度。"
+                                    IsOn="{Binding SettingsService.Settings.IsWaitForTransientDisabled, Mode=TwoWay}"
+                                    Margin="0 0 0 6" />
+            <!-- 教学安全模式 -->
+            <controls1:SettingsCard IconGlyph="CarBrakeAlert"
+                                    Header="教学安全模式"
+                                    Description="启用后，ClassIsland 会在崩溃时自动退出而不弹出崩溃窗口，以确保教学不受到影响。"
+                                    IsOn="{Binding SettingsService.Settings.IsCriticalSafeMode, Mode=TwoWay}"
+                                    Margin="0 0 0 6" />
         </StackPanel>
     </ScrollViewer>
 </controls:SettingsPageBase>
