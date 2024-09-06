@@ -188,7 +188,7 @@ public class FileFolderService(SettingsService settingsService, ILogger<FileFold
         {
             foreach (var i in backupFiles)
             {
-                if (!Path.Exists(Path.Combine(rootPath, i)))
+                if (!File.Exists(Path.Combine(rootPath, i)))
                 {
                     continue;
                 }
@@ -197,7 +197,7 @@ public class FileFolderService(SettingsService settingsService, ILogger<FileFold
 
             foreach (var i in backupFolders)
             {
-                if (!Path.Exists(Path.Combine(rootPath, i)))
+                if (!Directory.Exists(Path.Combine(rootPath, i)))
                 {
                     continue;
                 }

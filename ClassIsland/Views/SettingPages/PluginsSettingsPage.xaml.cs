@@ -80,7 +80,7 @@ public partial class PluginsSettingsPage : SettingsPageBase
         string document;
         try
         {
-            await DocumentLoadingCancellationTokenSource.CancelAsync();
+            DocumentLoadingCancellationTokenSource.Cancel();
             DocumentLoadingCancellationTokenSource = new();
             ViewModel.IsLoadingDocument = true;
             document = uri.Scheme switch
