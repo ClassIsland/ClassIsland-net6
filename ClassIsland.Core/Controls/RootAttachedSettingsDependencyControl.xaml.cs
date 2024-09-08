@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ClassIsland.Core.Abstractions.Services;
+using ClassIsland.Core.Abstractions.Services.Management;
 using ClassIsland.Core.Attributes;
 using ClassIsland.Core.Models.ProfileAnalyzing;
 using ClassIsland.Shared;
@@ -89,7 +90,7 @@ public partial class RootAttachedSettingsDependencyControl : UserControl, INotif
         }
         ProfileAnalyzeService.Analyze();
         Nodes = new ObservableCollection<AttachableObjectNode>(ProfileAnalyzeService.Nodes.Where(x =>
-            x.Value.Object.AttachedObjects.TryGetValue(ControlInfo.Guid.ToString(), out var value) &&
+            x.Value.Object != null && x.Value.Object.AttachedObjects.TryGetValue(ControlInfo.Guid.ToString(), out var value) &&
             IAttachedSettings.GetIsEnabled(value)).OrderByDescending(x => x.Value.Target).Select(x => x.Value));
     }
 
