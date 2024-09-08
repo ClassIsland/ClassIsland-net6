@@ -18,6 +18,12 @@ ClassIsland 是一款适用于班级多媒体屏幕的课表信息显示工具�
 ###### [观看介绍视频，快速了解突破创新 →](https://bilibili.com/video/BV1Lt421n7op/)
 </div>
 
+> [!warning]
+> 您当前正在查看的是 ClassIsland .NET 6 兼容版的仓库。本版本可以在 Windows 7 上正常运行，但与原版相比会缺失部分功能。如果您是 Windows 10 以及更新的系统，请前往[原版仓库](https://github.com/ClassIsland/ClassIsland)。关于此兼容版的更多信息，请参阅[文档](https://docs.classisland.tech/app/setup.html#关于-net-6-兼容版)。
+> 
+> 以下功能在此兼容版不可用：
+> - 插件功能
+
 ## 功能
 💡 您可以点击下方链接或查看 [ClassIsland 文档](https://docs.classisland.tech/zh-cn/latest/) 了解更多。
 
@@ -35,7 +41,7 @@ ClassIsland 是一款适用于班级多媒体屏幕的课表信息显示工具�
 ### 其它功能
 - [X] 自动同步软件时间、手动对齐铃声
 - [X] [天气](https://docs.classisland.tech/zh-cn/latest/app/advanced/#天气)、极端天气预警
-- [X] 通过[组件](https://docs.classisland.tech/zh-cn/latest/app/basic/#组件)（日期、时间、天气简报、倒计日等）和[插件](https://docs.classisland.tech/zh-cn/latest/app/basic/#组件)高度自定义 ClassIsland
+- [X] 通过[组件](https://docs.classisland.tech/zh-cn/latest/app/basic/#组件)（日期、时间、天气简报、倒计日等）和~~[插件](https://docs.classisland.tech/zh-cn/latest/app/basic/#组件)高度自定义 ClassIsland~~
 - [X] 丝滑、流畅的过渡动画
 - [X] 自动获取与系统配色搭配的主题色
 - [X] 自动软件更新
@@ -85,24 +91,21 @@ ClassIsland 是一款适用于班级多媒体屏幕的课表信息显示工具�
 ## 开始使用
 
 **首先，请确保您的设备满足以下推荐需求：**
-- Windows 10 及以上版本的系统，x64 架构
-- 安装 [.NET 8.0 桌面运行时](https://dotnet.microsoft.com/zh-cn/download/dotnet/thank-you/runtime-desktop-8.0.7-windows-x64-installer)
+- Windows 7 及以上版本的系统，x64 架构
+- 安装 [.NET 6.0 桌面运行时](https://dotnet.microsoft.com/zh-cn/download/dotnet/thank-you/runtime-desktop-6.0.33-windows-x64-installer)
 
 > [!important]
 > **详细安装说明请参阅 [ClassIsland 文档](https://docs.classisland.tech/zh-cn/latest/app/setup/)。**
-> 
-> 不建议在 Windows 10 以下的系统运行本应用。 在 Windows 7 中，.NET 运行时会产生**严重的内存泄漏问题**。如果您执意要在 Windows 7 中使用 ClassIsland，请参阅[在 Windows 7 中安装 ClassIsland](https://docs.classisland.tech/zh-cn/latest/app/setup/#检查系统需求)。
+
 
 对于普通用户，可以在以下渠道下载到本软件，请根据自身网络环境选择合适的渠道。
 
 > 测试版包含最新的功能，但也可能包含未完善和不稳定的功能。
 
 | 下载渠道 | **🚀正式版**<br/>[![正式版](https://img.shields.io/github/v/release/ClassIsland/ClassIsland?style=flat-square&color=%233fb950&label=)](https://github.com/ClassIsland/ClassIsland/releases/latest) | 🚧测试版<br/>[![测试版](https://img.shields.io/github/v/release/ClassIsland/ClassIsland?include_prereleases&style=flat-square&label=)](https://github.com/ClassIsland/ClassIsland/releases/) |
-| :--: | :--: | :--: |
-| GitHub | [**GitHub下载**](https://github.com/ClassIsland/ClassIsland/releases/latest) | [GitHub下载](https://github.com/ClassIsland/ClassIsland/releases) |
-| AppCenter | [**AppCenter下载**](https://install.appcenter.ms/users/hellowrc/apps/classisland/distribution_groups/public/releases/latest) | [AppCenter下载](https://install.appcenter.ms/users/hellowrc/apps/classisland/distribution_groups/publicbeta/releases/latest) |
+| :--: |:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| GitHub |                                                       [**GitHub下载**](https://github.com/ClassIsland/ClassIsland-net6/releases/latest)                                                        |                                                          [GitHub下载](https://github.com/ClassIsland/ClassIsland-net6/releases)                                                          |
 
-如果以上链接无法使用，可以从[镜像链接](https://docs.classisland.tech/zh-cn/latest/app/setup/#%E4%B8%8B%E8%BD%BD%E5%BA%94%E7%94%A8%E6%9C%AC%E4%BD%93)下载。
 
 下载完成后，将软件压缩包解压到一个**独立的文件夹（运行路径不能有中文）**，运行软件即可开始使用。解压时请不要解压到网盘同步文件夹、【下载】文件夹中，否则可能会出现**文件无法读写、文件丢失**等问题。
 
