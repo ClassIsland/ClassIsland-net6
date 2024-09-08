@@ -51,16 +51,16 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
 
     public static Dictionary<string, UpdateSource> UpdateSources = new()
     {
-        {AppCenterSourceKey, new UpdateSource()
-        {
-            Name = "Microsoft App Center",
-            Kind = UpdateSourceKind.AppCenter,
-            SpeedTestSources =
-            {
-                "install.appcenter.ms",
-                "appcenter-filemanagement-distrib1ede6f06e.azureedge.net"
-            }
-        }},
+        //{AppCenterSourceKey, new UpdateSource()
+        //{
+        //    Name = "Microsoft App Center",
+        //    Kind = UpdateSourceKind.AppCenter,
+        //    SpeedTestSources =
+        //    {
+        //        "install.appcenter.ms",
+        //        "appcenter-filemanagement-distrib1ede6f06e.azureedge.net"
+        //    }
+        //}},
         {GitHubSourceKey, new UpdateSource()
         {
             Name = "GitHub",
@@ -299,7 +299,7 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
         {
             github.Credentials = new Credentials(key);
         }
-        var r = await github.Repository.Release.GetAll("HelloWRC", "ClassIsland");
+        var r = await github.Repository.Release.GetAll("ClassIsland", "ClassIsland-net6");
         return r;
         //throw new ArgumentException("Releases info array is null!");
     }

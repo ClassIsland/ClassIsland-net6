@@ -346,7 +346,7 @@ public partial class App : AppBase, IAppHost
                 services.AddSettingsPage<UpdatesSettingsPage>();
                 services.AddSettingsPage<StorageSettingsPage>();
                 services.AddSettingsPage<PrivacySettingsPage>();
-                services.AddSettingsPage<PluginsSettingsPage>();
+                //services.AddSettingsPage<PluginsSettingsPage>();
                 services.AddSettingsPage<TestSettingsPage>();
                 services.AddSettingsPage<DebugPage>();
                 services.AddSettingsPage<DebugBrushesSettingsPage>();
@@ -397,7 +397,7 @@ public partial class App : AppBase, IAppHost
                 services.AddRule<CurrentSubjectRuleSettings, CurrentSubjectRuleSettingsControl>("classisland.lessons.currentSubject", "科目是", PackIconKind.BookOutline);
                 services.AddRule<TimeStateRuleSettings, TimeStateRuleSettingsControl>("classisland.lessons.timeState", "当前时间状态是", PackIconKind.ClockOutline);
                 // Plugins
-                PluginService.InitializePlugins(context, services);
+                //PluginService.InitializePlugins(context, services);
             }).Build();
         Logger = GetService<ILogger<App>>();
         var lifetime = IAppHost.GetService<IHostApplicationLifetime>();
