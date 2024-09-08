@@ -83,13 +83,13 @@ jobs:
           ls
           pwsh -ep Bypass -c ./tools/publish-nupkg.ps1 $env:is_release
       
-      - name: Upload Nuget packages to GitHub registry
-        if: ${{ github.event_name != 'pull_request' }} 
-        env:
-          GHPKG_KEY: ${{ secrets.GHPKG_KEY }}
-        run: |
-          dotnet nuget add source --username HelloWRC --password $env:GHPKG_KEY --store-password-in-clear-text --name github "https://nuget.pkg.github.com/ClassIsland/index.json"
-          dotnet nuget push .\out\*.nupkg -k $env:GHPKG_KEY --source "github" --skip-duplicate
+      # - name: Upload Nuget packages to GitHub registry
+      #   if: ${{ github.event_name != 'pull_request' }} 
+      #   env:
+      #     GHPKG_KEY: ${{ secrets.GHPKG_KEY }}
+      #   run: |
+      #     dotnet nuget add source --username HelloWRC --password $env:GHPKG_KEY --store-password-in-clear-text --name github "https://nuget.pkg.github.com/ClassIsland/index.json"
+      #     dotnet nuget push .\out\*.nupkg -k $env:GHPKG_KEY --source "github" --skip-duplicate
 
       - name: Upload Nuget Packages to artifacts
         if: ${{ !matrix.trim_assets }}
@@ -143,12 +143,12 @@ jobs:
       #     ls
       #     dotnet nuget push ./out/*.nupkg -k $env:NUGET_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
           
-      - name: Upload to AppCenter
-        env:
-          APPCENTER_TOKEN: ${{ secrets.APPCENTER_TOKEN }}
-        run: |
-          $env:app_ver = (git describe --abbrev=0 --tags)
-          Write-Host "Uploading to AppCenter..." -ForegroundColor Cyan
-          pwsh -ep Bypass -c .\tools\pre-appcenter-upload.ps1
-          pwsh -ep Bypass -c .\tools\appcenter-upload.ps1 $env:APPCENTER_TOKEN $env:app_ver
+      # - name: Upload to AppCenter
+      #   env:
+      #     APPCENTER_TOKEN: ${{ secrets.APPCENTER_TOKEN }}
+      #   run: |
+      #     $env:app_ver = (git describe --abbrev=0 --tags)
+      #     Write-Host "Uploading to AppCenter..." -ForegroundColor Cyan
+      #     pwsh -ep Bypass -c .\tools\pre-appcenter-upload.ps1
+      #     pwsh -ep Bypass -c .\tools\appcenter-upload.ps1 $env:APPCENTER_TOKEN $env:app_ver
 
