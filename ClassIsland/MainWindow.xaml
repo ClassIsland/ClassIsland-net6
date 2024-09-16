@@ -157,7 +157,6 @@
                 <Separator/>
                 <MenuItem Header="WelcomeWindow" Click="MenuItemDebugWelcomeWindow_OnClick"/>
                 <MenuItem Header="WelcomeWindow (Full)" Click="MenuItemDebugWelcomeWindow2_OnClick"/>
-                <MenuItem Header="ClassIsland 移动向导" Click="MenuItemDebugMoveClassIslandDirectory_OnClick"/>
                 <Separator/>
                 <MenuItem Header="FitSize" Click="MenuItemDebugFitSize_OnClick"/>
             </MenuItem>
@@ -604,8 +603,8 @@
                                         <Grid>
                                             <controls:ComponentPresenter IsOnMainWindow="True" 
                                                                          Settings="{Binding}"
-                                                                         HideOnRule="{Binding HideOnRule, Mode=OneWay}"
                                                                          HidingRules="{Binding HidingRules, Mode=OneWay}"
+                                                                         HideOnRule="{Binding HideOnRule, Mode=OneWay}"
                                                                          Margin="6 0" />
                                         </Grid>
                                     </DataTemplate>
