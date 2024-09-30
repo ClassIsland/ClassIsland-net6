@@ -13,7 +13,9 @@
 ClassIsland 是一款适用于班级多媒体屏幕的课表信息显示工具，可以在 Windows 屏幕上显示各种信息。<br/>
 本应用的名字灵感源于 iOS 灵动岛（Dynamic Island）功能。
 
-#### [ClassIsland 网站](https://classisland.tech/)｜[ClassIsland 文档](https://docs.classisland.tech/)｜[QQ 频道](https://pd.qq.com/s/scb3wzia)
+#### [点我进入 Classlsland 官方频道](https://classisland.tech/)
+
+#### [ClassIsland 官方网站](https://classisland.tech/)｜[ClassIsland 官方文档](https://docs.classisland.tech)｜[Classlsland 功能投票](https://github.com/ClassIsland/voting/discussions?discussions_q=is%3Aopen+sort%3Atop)
 
 ###### [观看介绍视频，快速了解突破创新 →](https://bilibili.com/video/BV1Lt421n7op/)
 </div>
@@ -29,23 +31,23 @@ ClassIsland 是一款适用于班级多媒体屏幕的课表信息显示工具�
 
 ### 课表显示
 - [X] 显示当天的课表、当前进行课程的信息
-- [X] 在上下课等重要时间点发出[提醒](https://docs.classisland.tech/app/notifications/)，自选搭配音效、强调特效和语音[增强提醒](https://docs.classisland.tech/app/notifications/#强调提醒)
+- [X] 在上下课等重要时间点发出[提醒](https://docs.classisland.tech/app/notifications)，自选搭配音效、强调特效和语音[增强提醒](https://docs.classisland.tech/app/notifications#强调提醒)
 - [X] 自选课表隐藏条件、临时隐藏与鼠标穿透，不影响授课
 
 ### 课表编辑与管理
-- [X] 简洁直观的[课表编辑工具](https://docs.classisland.tech/app/classplan/)
-- [X] 从 Excel 或其他软件[导入课表](https://docs.classisland.tech/app/profile-settings-page/#从表格导入)
+- [X] 简洁直观的[课表编辑工具](https://docs.classisland.tech/app/classplan)
+- [X] 从 Excel 或其他软件[导入课表](https://docs.classisland.tech/app/profile/#%E4%BB%8E%E8%A1%A8%E6%A0%BC%E5%AF%BC%E5%85%A5)
 - [X] 多周轮换、快速录入时间表、自定义设置
 - [X] 临时换课、临时启用某个课表
 
 ### 其它功能
 - [X] 自动同步软件时间、手动对齐铃声
-- [X] [天气](https://docs.classisland.tech/app/advanced/#天气)、极端天气预警
-- [X] 通过[组件](https://docs.classisland.tech/app/basic/#组件)（日期、时间、天气简报、倒计日等）和[插件](https://docs.classisland.tech/app/basic/#组件)高度自定义 ClassIsland
+- [X] [天气](https://docs.classisland.tech/app/advanced#天气)、极端天气预警
+- [X] 通过[组件](https://docs.classisland.tech/app/basic#组件)（日期、时间、天气简报、倒计日等）和[插件](https://docs.classisland.tech/app/basic#组件)高度自定义 ClassIsland
 - [X] 丝滑、流畅的过渡动画
 - [X] 自动获取与系统配色搭配的主题色
 - [X] 自动软件更新
-- [ ] [集控管理](https://docs.classisland.tech/management/)_（即将发布）_
+- [ ] [集控管理](https://docs.classisland.tech/management)_（即将发布）_
 - [ ] ……
 
 ## 软件截图
@@ -95,7 +97,7 @@ ClassIsland 是一款适用于班级多媒体屏幕的课表信息显示工具�
 - 安装 [.NET 6.0 桌面运行时](https://dotnet.microsoft.com/zh-cn/download/dotnet/thank-you/runtime-desktop-6.0.33-windows-x64-installer)
 
 > [!important]
-> **详细安装说明请参阅 [ClassIsland 文档](https://docs.classisland.tech/app/setup/)。**
+> **详细安装说明请参阅 [ClassIsland 文档](https://docs.classisland.tech/app/setup)。**
 
 
 对于普通用户，可以在以下渠道下载到本软件，请根据自身网络环境选择合适的渠道。
@@ -113,11 +115,11 @@ ClassIsland 是一款适用于班级多媒体屏幕的课表信息显示工具�
 
 您可以访问以下页面来**获取帮助**：
 
-- [ClassIsland 帮助文档](https://docs.classisland.tech/app/)
+- [ClassIsland 帮助文档](https://docs.classisland.tech/app)
 
 您也可以加入这些社区**寻求帮助**：
 
-[![GitHub Issues](https://img.shields.io/github/issues-search/ClassIsland/ClassIsland?query=is%3Aopen&style=flat-square&logo=github&label=Issues&color=%233fb950)]()
+[![GitHub Issues](https://img.shields.io/github/issues-search/ClassIsland/ClassIsland?query=is%3Aopen&style=flat-square&logo=github&label=Issues&color=%233fb950)](https://github.com/ClassIsland/ClassIsland/issues)
 [![GitHub Discussions](https://img.shields.io/github/discussions/ClassIsland/ClassIsland?style=flat-square&logo=Github&label=Discussions)](https://github.com/ClassIsland/ClassIsland/discussions)
 [![加入 QQ 频道](https://img.shields.io/badge/QQ%E9%A2%91%E9%81%93-%230066cc?style=flat-square&logo=TencentQQ)](https://pd.qq.com/s/scb3wzia)
 

@@ -36,6 +36,8 @@ using Microsoft.Extensions.Logging;
 using ClassIsland.Services;
 using CommonDialog = ClassIsland.Core.Controls.CommonDialog.CommonDialog;
 using Sentry;
+using System.IO;
+using Path = System.IO.Path;
 
 namespace ClassIsland.Views;
 
@@ -354,7 +356,7 @@ public partial class SettingsWindowNew : MyWindow
     {
         try
         {
-            var r = CommonDialog.ShowDialog("ClassIsland", $"您正在导出应用的诊断数据。导出的诊断数据将包含应用当前运行的日志、系统及环境信息、应用设置、当前加载的档案和集控设置（如有），可能包含敏感信息，请在导出后注意检查。", new BitmapImage(new Uri("/Assets/HoYoStickers/帕姆_注意.png", UriKind.Relative)),
+            var r = CommonDialog.ShowDialog("ClassIsland", $"您正在导出应用的诊断数据。导出的诊断数据将包含应用 30 天内产生的日志、系统及环境信息、应用设置、当前加载的档案和集控设置（如有），可能包含敏感信息，请在导出后注意检查。", new BitmapImage(new Uri("/Assets/HoYoStickers/帕姆_注意.png", UriKind.Relative)),
                 60, 60, [
                     new DialogAction()
                     {
@@ -405,5 +407,23 @@ public partial class SettingsWindowNew : MyWindow
             e.Accepted = false;
             return;
         }
+    }
+
+    private void MenuItemOpenLogFolder_OnClick(object sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo()
+        {
+            FileName = Path.GetFullPath(App.AppLogFolderPath) ?? "",
+            UseShellExecute = true
+        });
+    }
+
+    private void MenuItemOpenAppFolder_OnClick(object sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo()
+        {
+            FileName = Path.GetFullPath(".") ?? "",
+            UseShellExecute = true
+        });
     }
 }
