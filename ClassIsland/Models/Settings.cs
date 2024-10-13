@@ -38,6 +38,8 @@ namespace ClassIsland.Models;
 public class Settings : ObservableRecipient, ILessonControlSettings, INotificationSettings
 {
     private int _theme = 2;
+    private bool _iscustomBackgroundColorEnabled = false;
+    private Color _backgroundColor = Colors.Black;
     private Color _primaryColor = Colors.DeepSkyBlue;
     private Color _secondaryColor = Colors.Aquamarine;
     private DateTime _singleWeekStartTime = DateTime.Now;
@@ -187,7 +189,7 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
     private DateTime _lastAutoBackupTime = DateTime.Now;
     private int _autoBackupLimit = 16;
     private int _autoBackupIntervalDays = 7;
-    private bool _useRawInput = true;
+    private bool _useRawInput = false;
     private bool _isMouseInFadingEnabled = true;
     private double _touchInFadingDurationMs = 0;
     private bool _isCompatibleWindowTransparentEnabled = false;
@@ -205,6 +207,8 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
     private double _scheduleSpacing = 1;
     private bool _showCurrentLessonOnlyOnClass = false;
     private bool _isSwapMode = true;
+    private bool _showEchoCaveWhenSettingsPageLoading = false;
+    private int _settingsPagesCachePolicy = 0;
 
     public void NotifyPropertyChanged(string propertyName)
     {
@@ -887,6 +891,28 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         {
             if (value.Equals(_targetLightValue)) return;
             _targetLightValue = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsCustomBackgroundColorEnabled
+    {
+        get => _iscustomBackgroundColorEnabled;
+        set
+        {
+            if (value == _iscustomBackgroundColorEnabled) return;
+            _iscustomBackgroundColorEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public Color BackgroundColor
+    {
+        get => _backgroundColor;
+        set
+        {
+            if (value.Equals(_backgroundColor)) return;
+            _backgroundColor = value;
             OnPropertyChanged();
         }
     }
@@ -2075,4 +2101,25 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         }
     }
 
+    public bool ShowEchoCaveWhenSettingsPageLoading
+    {
+        get => _showEchoCaveWhenSettingsPageLoading;
+        set
+        {
+            if (value == _showEchoCaveWhenSettingsPageLoading) return;
+            _showEchoCaveWhenSettingsPageLoading = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public int SettingsPagesCachePolicy
+    {
+        get => _settingsPagesCachePolicy;
+        set
+        {
+            if (value == _settingsPagesCachePolicy) return;
+            _settingsPagesCachePolicy = value;
+            OnPropertyChanged();
+        }
+    }
 }
