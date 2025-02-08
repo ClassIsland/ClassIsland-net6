@@ -7,6 +7,7 @@
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <EnableDynamicLoading>true</EnableDynamicLoading>
+	  <Configurations>Debug;Release;Debug_MSIX;Release_MSIX</Configurations>
 
   </PropertyGroup>
 

@@ -117,7 +117,7 @@
     },
     {
       "login": "DryIce-cc",
-      "name": "DryIce-cc",
+      "name": "干冰DryIce",
       "avatar_url": "https://avatars.githubusercontent.com/u/165131008?v=4",
       "profile": "https://github.com/DryIce-cc",
       "contributions": [
@@ -143,12 +143,49 @@
       ]
     },
     {
-      "login": "LyCecilion",
-      "name": "一般路过绫音酱_Cecilion",
+      "login": "LyRin-owo",
+      "name": "零音LyRin",
       "avatar_url": "https://avatars.githubusercontent.com/u/141834038?v=4",
-      "profile": "https://blog.kagureion.top/",
+      "profile": "https://lyrin-owo.top/",
       "contributions": [
-        "doc"
+        "doc",
+        "promotion"
+      ]
+    },
+    {
+      "login": "LiPolymer",
+      "name": "LiPolymer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/110595296?v=4",
+      "profile": "http://lipoly.ink",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "mcAmiya",
+      "name": "Amiya",
+      "avatar_url": "https://avatars.githubusercontent.com/u/53519310?v=4",
+      "profile": "http://www.mczhiguang.icoc.me/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "xiaowuap",
+      "name": "Enzo Wu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44547885?v=4",
+      "profile": "http://xiaowuap.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "itsHenry35",
+      "name": "itsHenry",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58730749?v=4",
+      "profile": "https://itshenryz.com",
+      "contributions": [
+        "code"
       ]
     }
   ],
