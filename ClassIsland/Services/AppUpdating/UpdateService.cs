@@ -57,7 +57,7 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
     internal static string UpdateCachePath { get; } = Path.Combine(App.AppCacheFolderPath, "Update");
 
     internal const string UpdateMetadataUrl =
-        "https://get.classisland.tech/p/ClassIsland-Ningbo-S3/classisland/disturb/index.json";
+        "https://get.classisland.tech/p/ClassIsland-Ningbo-S3/classisland/disturb-net6/index.json";
 
     public static string UpdateTempPath =>
 #if IsMsix
@@ -444,8 +444,9 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
         }
 
         await using var stream = File.OpenRead(Path.Combine(UpdateTempPath, @"./update.zip"));
-        var sha256 = await SHA256.HashDataAsync(stream);
-        var str = BitConverter.ToString(sha256);
+        var sha256 = SHA256.Create();
+        var result = await sha256.ComputeHashAsync(stream);
+        var str = BitConverter.ToString(result);
         str = str.Replace("-", "");
         Logger.LogDebug("更新文件哈希：{}", str);
         if (!string.Equals(str, Settings.UpdateArtifactHash, StringComparison.CurrentCultureIgnoreCase))
