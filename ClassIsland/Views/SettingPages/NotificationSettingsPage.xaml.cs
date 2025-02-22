@@ -1,4 +1,4 @@
-﻿using ClassIsland.Core.Abstractions.Controls;
+using ClassIsland.Core.Abstractions.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -64,7 +64,6 @@ public partial class NotificationSettingsPage : SettingsPageBase
             GptSoVitsPort = "80",
             GptSoVitsPromptText = "既然罗莎莉亚说足迹上有元素力，用元素视野应该能很清楚地看到吧。",
             GptSoVitsRefAudioPath = "template_audio/paimon.wav"
-
         },
         new GptSoVitsSpeechSettings
         {
@@ -76,7 +75,6 @@ public partial class NotificationSettingsPage : SettingsPageBase
             GptSoVitsPort = "80",
             GptSoVitsPromptText = "买东西那天还有一个人一起帮着看了款式，那个人好像叫",
             GptSoVitsRefAudioPath = "template_audio/klee.wav"
-
         },
         new GptSoVitsSpeechSettings
         {
@@ -89,7 +87,19 @@ public partial class NotificationSettingsPage : SettingsPageBase
             GptSoVitsPromptText = "这里有别于神里家的布景，移步之间，处处都有新奇感。",
             GptSoVitsRefAudioPath = "template_audio/ayaka.wav"
         }
-        ];
+        ,
+        new GptSoVitsSpeechSettings
+        {
+            PresetName = "爱莉希雅（崩坏3）",
+            GptSoVitsVoiceName = "elysia",
+            IsInternal = true,
+            GptSoVitsServerIp = "elysia.tts.wez.ink",
+            GptSoVitsBatchSize = 5,
+            GptSoVitsPort = "80",
+            GptSoVitsPromptText = "他这么向我说道，悲剧并非终结，而是希望的起始。",
+            GptSoVitsRefAudioPath = "template_audio/elysia.wav"
+        }
+        ];        
 
     public NotificationSettingsPage(SettingsService settingsService, INotificationHostService notificationHostService, ISpeechService speechService, IManagementService managementService)
     {

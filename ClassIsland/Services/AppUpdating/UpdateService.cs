@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -25,6 +25,7 @@ using ClassIsland.Core.Models;
 using ClassIsland.Core.Models.Updating;
 using ClassIsland.Helpers;
 using ClassIsland.Models;
+using ClassIsland.Shared;
 using ClassIsland.Shared.Enums;
 using ClassIsland.Shared.Helpers;
 using ClassIsland.Views;
@@ -194,7 +195,6 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
         if (Settings.IsAutoSelectUpgradeMirror && DateTime.Now - Settings.LastSpeedTest >= TimeSpan.FromDays(7))
         {
             await App.GetService<UpdateNodeSpeedTestingService>().RunSpeedTestAsync();
-
         }
         await CheckUpdateAsync();
 
@@ -281,11 +281,10 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
 
             SelectedVersionInfo = await WebRequestHelper.SaveJson<VersionInfo>(new Uri(version.VersionInfoUrl + $"?time={DateTime.Now.ToFileTimeUtc()}"), Path.Combine(UpdateCachePath, "SelectedVersionInfo.json"), verifySign: true, publicKey: MetadataPublisherPublicKey);
             Settings.LastUpdateStatus = UpdateStatus.UpdateAvailable;
-            TaskBarIconService.MainTaskBarIcon.ShowNotification("发现新版本",
+            TaskBarIconService.ShowNotification("发现新版本",
                 $"{Assembly.GetExecutingAssembly().GetName().Version} -> {version.Version}\n" +
-                "点击以查看详细信息。");
+                "点击以查看详细信息。", clickedCallback:UpdateNotificationClickedCallback);
 
-            Settings.LastCheckUpdateTime = DateTime.Now;
             Settings.LastUpdateStatus = UpdateStatus.UpdateAvailable;
         }
         catch (Exception ex)
@@ -296,9 +295,15 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
         }
         finally
         {
+            Settings.LastCheckUpdateTime = DateTime.Now;
             UpdateInfoUpdated?.Invoke(this, EventArgs.Empty);
             CurrentWorkingStatus = UpdateWorkingStatus.Idle;
         }
+    }
+
+    private void UpdateNotificationClickedCallback()
+    {
+        IAppHost.GetService<IUriNavigationService>().NavigateWrapped(new Uri("classisland://app/settings/update"));
     }
 
     private bool IsNewerVersion(bool isForce, bool isCancel, Version verCode)
@@ -369,7 +374,6 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
                 }
             };
             await Downloader.StartAsync();
-
         }
         catch (Exception ex)
         {
@@ -381,7 +385,6 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
         {
             CurrentWorkingStatus = UpdateWorkingStatus.Idle;
         }
-
     }
 
     public async void StopDownloading()
@@ -423,7 +426,6 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
         
         DownloadEtcSeconds = TimeSpan.FromSeconds(DownloadSpeed == 0 ? 0 : (long)((TotalSize - DownloadedSize) / DownloadSpeed));
         Logger.LogInformation("Download progress changed: {}/{} ({}B/s)", TotalSize, DownloadedSize, DownloadSpeed);
-
     }
 
     public async Task ExtractUpdateAsync()
@@ -459,7 +461,7 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
     {
         var success = true;
         Logger.LogInformation("正在重启至升级模式。");
-        TaskBarIconService.MainTaskBarIcon.ShowNotification("正在安装应用更新", "这可能需要10-30秒的时间，请稍后……");
+        TaskBarIconService.ShowNotification("正在安装应用更新", "这可能需要10-30秒的时间，请稍后……");
         CurrentWorkingStatus = UpdateWorkingStatus.ExtractingUpdates;
         try
         {
@@ -480,7 +482,7 @@ public class UpdateService : IHostedService, INotifyPropertyChanged
         {
             success = false;
             Logger.LogError(ex, "无法安装更新");
-            TaskBarIconService.MainTaskBarIcon.ShowNotification("安装更新失败", ex.Message);
+            TaskBarIconService.ShowNotification("安装更新失败", ex.Message, clickedCallback:UpdateNotificationClickedCallback);
             CurrentWorkingStatus = UpdateWorkingStatus.Idle;
             await RemoveDownloadedFiles();
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
@@ -79,6 +79,9 @@ using Windows.Storage;
 using ClassIsland.Services.Automation.Triggers;
 using ClassIsland.Controls.TriggerSettingsControls;
 using ClassIsland.Models.Automation.Triggers;
+using MahApps.Metro.Controls;
+using Walterlv.Threading;
+using Walterlv.Windows;
 
 namespace ClassIsland;
 /// <summary>
@@ -246,7 +249,6 @@ public partial class App : AppBase, IAppHost
             {
                 scope.Level = SentryLevel.Fatal;
             });
-            
         }
         if (!safe)
             CrashWindow.ShowDialog();
@@ -265,6 +267,7 @@ public partial class App : AppBase, IAppHost
         );
         SentrySdk.ConfigureScope(s => s.Transaction = transaction);
         var spanPreInit = transaction.StartChild("startup-init");
+        MyWindow.ShowOssWatermark = ApplicationCommand.ShowOssWatermark;
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         //DependencyPropertyHelper.ForceOverwriteDependencyPropertyDefaultValue(FrameworkElement.FocusVisualStyleProperty,
         //    Resources[SystemParameters.FocusVisualStyleKey]);
@@ -418,7 +421,6 @@ public partial class App : AppBase, IAppHost
                     {
                         return new EdgeTtsService();
                     }
-                    
                 }));
                 services.AddSingleton<IExactTimeService, ExactTimeService>();
                 //services.AddSingleton(typeof(ApplicationCommand), ApplicationCommand);
@@ -431,7 +433,7 @@ public partial class App : AppBase, IAppHost
                 services.AddSingleton<MainWindow>();
                 services.AddSingleton<SplashWindow>();
                 services.AddTransient<FeatureDebugWindow>();
-                services.AddSingleton<TopmostEffectWindow>();
+                services.AddSingleton<TopmostEffectWindow>(BuildTopmostEffectWindow);
                 services.AddSingleton<AppLogsWindow>();
                 services.AddSingleton<SettingsWindowNew>();
                 services.AddSingleton<ProfileSettingsWindow>((s) => new ProfileSettingsWindow()
@@ -439,6 +441,7 @@ public partial class App : AppBase, IAppHost
                     MainViewModel = s.GetService<MainWindow>()?.ViewModel ?? new()
                 });
                 services.AddTransient<ClassPlanDetailsWindow>();
+                services.AddTransient<WindowRuleDebugWindow>();
                 // 设置页面
                 services.AddSettingsPage<GeneralSettingsPage>();
                 services.AddSettingsPage<ComponentsSettingsPage>();
@@ -522,7 +525,12 @@ public partial class App : AppBase, IAppHost
                 services.AddRule<WindowStatusRuleSettings, WindowStatusRuleSettingsControl>("classisland.windows.status", "前台窗口状态是", PackIconKind.DockWindow);
                 services.AddRule<StringMatchingSettings, RulesetStringMatchingSettingsControl>("classisland.windows.processName", "前台窗口进程", PackIconKind.ApplicationCogOutline);
                 services.AddRule<CurrentSubjectRuleSettings, CurrentSubjectRuleSettingsControl>("classisland.lessons.currentSubject", "科目是", PackIconKind.BookOutline);
+                services.AddRule<CurrentSubjectRuleSettings, CurrentSubjectRuleSettingsControl>("classisland.lessons.nextSubject", "下节课科目是", PackIconKind.BookArrowRightOutline);
+                services.AddRule<CurrentSubjectRuleSettings, CurrentSubjectRuleSettingsControl>("classisland.lessons.previousSubject", "上节课科目是", PackIconKind.BookArrowLeftOutline);
                 services.AddRule<TimeStateRuleSettings, TimeStateRuleSettingsControl>("classisland.lessons.timeState", "当前时间状态是", PackIconKind.ClockOutline);
+                services.AddRule<CurrentWeatherRuleSettings, CurrentWeatherRuleSettingsControl>("classisland.weather.currentWeather", "当前天气是", PackIconKind.WeatherCloudy);
+                services.AddRule<StringMatchingSettings, RulesetStringMatchingSettingsControl>("classisland.weather.hasWeatherAlert", "存在气象预警", PackIconKind.WeatherCloudyAlert);
+                services.AddRule<RainTimeRuleSettings, RainTimeRuleSettingsControl>("classisland.weather.rainTime", "距离降水开始/结束还剩", PackIconKind.WeatherHeavyRain);
                 // 行动
                 services.AddAction<SignalTriggerSettings, BroadcastSignalActionSettingsControl>("classisland.broadcastSignal", "广播信号", PackIconKind.Broadcast);
                 services.AddAction<CurrentComponentConfigActionSettings, CurrentComponentConfigActionSettingsControl>("classisland.settings.currentComponentConfig", "组件配置方案", PackIconKind.WidgetsOutline);
@@ -589,26 +597,24 @@ public partial class App : AppBase, IAppHost
         if (Settings.IsSplashEnabled && !ApplicationCommand.Quiet)
         {
             var spanShowSplash = spanLaunching.StartChild("startup-show-splash");
-            GetService<SplashWindow>().Show();
-            GetService<ISplashService>().CurrentProgress = 25;
-            var b = false;
-            while (!b && !IThemeService.IsWaitForTransientDisabled)
+            var splashDispatcherAwaiter = AsyncBox.RelatedAsyncDispatchers.GetOrAdd(Dispatcher, dispatcher => UIDispatcher.RunNewAsync("AsyncBox"));
+            while (!splashDispatcherAwaiter.IsCompleted)
             {
-                Dispatcher.Invoke(DispatcherPriority.Background, () =>
-                {
-                    b = GetService<SplashWindow>().IsRendered;
-                });
-                //Console.WriteLine(b);
-                await Dispatcher.Yield(DispatcherPriority.Background);
             }
+            splashDispatcherAwaiter.Result.Invoke(() =>
+            {
+                GetService<SplashWindow>().Show();
+            });
             spanShowSplash.Finish();
         }
-        GetService<ISplashService>().CurrentProgress = 50;
+        GetService<ISplashService>().CurrentProgress = 30;
+        GetService<ISplashService>().SetDetailedStatus("正在启动挂起检查服务");
 
         var spanStartHangService = spanLaunching.StartChild("startup-start-hang-service");
         GetService<IHangService>();
         spanStartHangService.Finish();
 
+        GetService<ISplashService>().SetDetailedStatus("正在创建任务栏图标");
         var spanCreateTaskbarIcon = spanLaunching.StartChild("startup-create-taskbar-icon");
         try
         {
@@ -621,14 +627,9 @@ public partial class App : AppBase, IAppHost
             spanCreateTaskbarIcon.Finish(ex);
         }
 
-        if (ApplicationCommand.UpdateDeleteTarget != null)
-        {
-            GetService<SettingsService>().Settings.LastUpdateStatus = UpdateStatus.UpToDate;
-            GetService<ITaskBarIconService>().MainTaskBarIcon.ShowNotification("更新完成。", $"应用已更新到版本{AppVersion}。点击此处以查看更新日志。");
-        }
-
         if (!ApplicationCommand.Quiet)  // 在静默启动时不进行更新相关操作
         {
+            GetService<ISplashService>().SetDetailedStatus("正在进行更新服务启动操作");
             var spanCheckUpdate = spanLaunching.StartChild("startup-process-update");
             var r = await GetService<UpdateService>().AppStartup();
             spanCheckUpdate.Finish();
@@ -638,8 +639,9 @@ public partial class App : AppBase, IAppHost
                 return;
             }
         }
-        GetService<ISplashService>().CurrentProgress = 75;
+        GetService<ISplashService>().CurrentProgress = 45;
 
+        GetService<ISplashService>().SetDetailedStatus("正在加载档案");
         await GetService<IProfileService>().LoadProfileAsync();
         GetService<IWeatherService>();
         GetService<IExactTimeService>();
@@ -649,6 +651,8 @@ public partial class App : AppBase, IAppHost
 
         var spanLoadMainWindow = spanLaunching.StartChild("span-loading-mainWindow");
         Logger.LogInformation("正在初始化MainWindow。");
+        GetService<ISplashService>().SetDetailedStatus("正在启动主界面所需的服务");
+        GetService<ISplashService>().CurrentProgress = 55;
 #if DEBUG
         MemoryProfiler.GetSnapshot("Pre MainWindow init");
 #endif
@@ -656,6 +660,8 @@ public partial class App : AppBase, IAppHost
         MainWindow = mw;
         mw.StartupCompleted += (o, args) =>
         {
+            GetService<ISplashService>().CurrentProgress = 98;
+            GetService<ISplashService>().SetDetailedStatus("正在进行启动后操作");
             // 由于在应用启动时调用 WMI 会导致无法使用触摸，故在应用启动完成后再获取设备统计信息。
             // https://github.com/dotnet/wpf/issues/9752
             if (IsSentryEnabled)
@@ -675,13 +681,18 @@ public partial class App : AppBase, IAppHost
             SentrySdk.ConfigureScope(s => s.Transaction = null);
             GetService<IAutomationService>();
             GetService<IRulesetService>().NotifyStatusChanged();
+            if (Settings.IsSplashEnabled)
+            {
+                App.GetService<ISplashService>().EndSplash();
+            }
             _isStartedCompleted = true;
         };
 #if DEBUG
         MemoryProfiler.GetSnapshot("Pre MainWindow show");
 #endif
+        GetService<ISplashService>().CurrentProgress = 80;
+        GetService<ISplashService>().SetDetailedStatus("正在初始化主界面（步骤 2/2）");
         GetService<MainWindow>().Show();
-        GetService<ISplashService>().CurrentProgress = 90;
         GetService<IWindowRuleService>();
         GetService<SignalTriggerHandlerService>();
 
@@ -702,6 +713,28 @@ public partial class App : AppBase, IAppHost
         {
             Logger.LogError(ex, "无法创建自动备份。");
         }
+
+        if (ApplicationCommand.UpdateDeleteTarget != null)
+        {
+            GetService<SettingsService>().Settings.LastUpdateStatus = UpdateStatus.UpToDate;
+            GetService<ITaskBarIconService>().ShowNotification("更新完成。", $"应用已更新到版本{AppVersion}。点击此处以查看更新日志。", clickedCallback:() => uriNavigationService.NavigateWrapped(new Uri("classisland://app/settings/update")));
+        }
+    }
+
+    private TopmostEffectWindow BuildTopmostEffectWindow(IServiceProvider x)
+    {
+        
+        var windowDispatcherAwaiter = AsyncBox.RelatedAsyncDispatchers.GetOrAdd(Dispatcher, dispatcher => UIDispatcher.RunNewAsync("AsyncBox"));
+        while (!windowDispatcherAwaiter.IsCompleted)
+        {
+        }
+
+        return windowDispatcherAwaiter.Result.Invoke(() =>
+        {
+            var window = new TopmostEffectWindow(x.GetRequiredService<ILogger<TopmostEffectWindow>>(), x.GetRequiredService<SettingsService>());
+            return window;
+        });
+        
     }
 
     private void UriNavigationCommandExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -756,7 +789,6 @@ public partial class App : AppBase, IAppHost
         catch (Exception e)
         {
             CommonDialog.ShowError($"无法重新启动应用，可能当前运行的实例正在以管理员身份运行。请使用任务管理器终止正在运行的实例，然后再试一次。\n\n{e.Message}");
-
         }
     }
 
@@ -840,7 +872,7 @@ public partial class App : AppBase, IAppHost
 
     public override void Stop()
     {
-        Dispatcher.Invoke(() =>
+        Dispatcher.Invoke(async () =>
         {
             AppStopping?.Invoke(this, EventArgs.Empty);
             IAppHost.Host?.Services.GetService<ILessonsService>()?.StopMainTimer();
@@ -849,6 +881,14 @@ public partial class App : AppBase, IAppHost
             IAppHost.Host?.Services.GetService<IAutomationService>()?.SaveConfig("停止当前应用程序。");
             IAppHost.Host?.Services.GetService<IProfileService>()?.SaveProfile();
             Current.Shutdown();
+            if (AsyncBox.RelatedAsyncDispatchers.TryGetValue(Dispatcher, out var asyncDispatcherAwaiter))
+            {
+                var asyncDispatcher = await asyncDispatcherAwaiter;
+                if (!asyncDispatcher.HasShutdownStarted)
+                {
+                    asyncDispatcher.InvokeShutdown();
+                }
+            }
             try
             {
                 //ReleaseLock();

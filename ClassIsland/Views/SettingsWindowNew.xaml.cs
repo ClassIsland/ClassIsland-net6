@@ -1,4 +1,4 @@
-﻿using ClassIsland.Core.Controls;
+using ClassIsland.Core.Controls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -235,7 +235,6 @@ public partial class SettingsWindowNew : MyWindow
 
     private async void NavigationListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        
     }
 
     private async Task CoreNavigate(SettingsPageInfo? info, Uri? uri = null)
@@ -531,5 +530,10 @@ public partial class SettingsWindowNew : MyWindow
             FileName = Path.GetFullPath(".") ?? "",
             UseShellExecute = true
         });
+    }
+
+    private void MenuItemDebugWindowRule_OnClick(object sender, RoutedEventArgs e)
+    {
+        IAppHost.GetService<WindowRuleDebugWindow>().Show();
     }
 }

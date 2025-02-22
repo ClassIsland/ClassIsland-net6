@@ -570,9 +570,6 @@
             <Run Text="GridRoot:"/>
             <Run Text="{Binding ActualWidth, ElementName=GridRoot, Mode=OneWay, StringFormat={}{0:f1}}"/>
             <Run Text="{Binding ActualHeight, ElementName=GridRoot, Mode=OneWay, StringFormat={}{0:f1}}"/>
-            <Run Text="GridWrapper:"/>
-            <Run Text="{Binding ActualWidth, ElementName=GridWrapper, Mode=OneWay, StringFormat={}{0:f1}}"/>
-            <Run Text="{Binding ActualHeight, ElementName=GridWrapper, Mode=OneWay, StringFormat={}{0:f1}}"/>
             <LineBreak/>
             <Run Text="CurrentTime:"/>
             <Run Text="{Binding ViewModel.DebugCurrentTime, ConverterCulture=zh-CN}"/>
@@ -584,5 +581,14 @@
             <Run Text="{x:Static local:App.AppVersionLong}"/>
         </TextBlock>
 
+        <!-- Reserved transforms -->
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <TranslateTransform/>
+                <ScaleTransform/>
+                <RotateTransform/>
+                <MatrixTransform/>
+            </TransformGroup>
+        </Grid.RenderTransform>
     </Grid>
 </Window>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -223,6 +223,7 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
     private double _mainWindowLineVerticalMargin = 5;
     private ObservableCollection<string> _trustedProfileIds = [];
     private bool _isNonExactCountdownEnabled = false;
+    private bool _showDetailedStatusOnSplash = false;
 
 
     public void NotifyPropertyChanged(string propertyName)
@@ -504,7 +505,6 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
             {
                 IAppHost.GetService<ILogger<Settings>>().LogError(ex, "无法设置 Sentry 启用状态。");
             }
-
         }
     }
 
@@ -785,6 +785,17 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         {
             if (value == _isCriticalSafeMode) return;
             _isCriticalSafeMode = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowDetailedStatusOnSplash
+    {
+        get => _showDetailedStatusOnSplash;
+        set
+        {
+            if (value == _showDetailedStatusOnSplash) return;
+            _showDetailedStatusOnSplash = value;
             OnPropertyChanged();
         }
     }
@@ -1219,7 +1230,6 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         get => _speechSource;
         set
         {
-
             if (value == _speechSource) return;
             if (!IsSystemSpeechSystemExist)
             {
@@ -1640,6 +1650,18 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
         }
     }
 
+    bool _isIgnoreWorkAreaEnabled;
+    public bool IsIgnoreWorkAreaEnabled
+    {
+        get => _isIgnoreWorkAreaEnabled;
+        set
+        {
+            if (value == _isIgnoreWorkAreaEnabled) return;
+            _isIgnoreWorkAreaEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
     public int WindowDockingOffsetX
     {
         get => _windowDockingOffsetX;
@@ -2233,6 +2255,30 @@ public class Settings : ObservableRecipient, ILessonControlSettings, INotificati
             if (Equals(value, _trustedProfileIds)) return;
             _trustedProfileIds = value;
             OnPropertyChanged();
+        }
+    }
+
+    [JsonIgnore]
+    public bool ShowSellingAnnouncement
+    {
+        get => Environment.GetEnvironmentVariable("ClassIsland_ShowSellingAnnouncement") is "1" or null;
+        set
+        {
+            try
+            {
+                var envVar = value ? "1" : "0";
+                Environment.SetEnvironmentVariable("ClassIsland_ShowSellingAnnouncement", envVar);
+                // 因为 Environment.SetEnvironmentVariable 有时会执行很长时间，所以这里要直接修改注册表。
+                using var reg = Registry.CurrentUser.OpenSubKey(
+                    @"Environment", true);
+                reg?.SetValue("ClassIsland_ShowSellingAnnouncement", envVar, RegistryValueKind.String);
+                OnPropertyChanged();
+            }
+            catch (Exception ex)
+            {
+                IAppHost.GetService<ILogger<Settings>>().LogError(ex, "无法设置 ShowSellingAnnouncement 启用状态。");
+            }
+
         }
     }
 }

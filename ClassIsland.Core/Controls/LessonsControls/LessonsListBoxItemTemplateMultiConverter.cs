@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using ClassIsland.Core.Abstractions.Services;
@@ -71,7 +71,9 @@ internal class LessonsListBoxItemTemplateMultiConverter : DependencyObject, IMul
             return BlankDataTemplate;
 
         var itemDateTime = (currentItem?.TimeType == 2) ? currentItem?.StartSecond : currentItem?.EndSecond;
-        if (itemDateTime.HasValue && TimeOnly.FromDateTime(itemDateTime.Value) < TimeOnly.FromDateTime(IAppHost.GetService<IExactTimeService>().GetCurrentLocalDateTime()) && hideFinishedClass)
+        if ((itemDateTime?.TimeOfDay < selectedItem?.StartSecond.TimeOfDay 
+             || itemDateTime.HasValue && itemDateTime.Value.TimeOfDay <
+                IAppHost.GetService<IExactTimeService>().GetCurrentLocalDateTime().TimeOfDay) && hideFinishedClass)
         {
             return BlankDataTemplate;
         }
@@ -93,6 +95,6 @@ internal class LessonsListBoxItemTemplateMultiConverter : DependencyObject, IMul
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
     {
-        return new object[] { };
+        return Array.Empty<object>();
     }
 }

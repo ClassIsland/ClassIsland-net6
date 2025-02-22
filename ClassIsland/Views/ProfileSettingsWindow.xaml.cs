@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -81,7 +81,6 @@ public partial class ProfileSettingsWindow : MyWindow
 
     private void ViewModelOnPropertyChanging(object? sender, PropertyChangingEventArgs e)
     {
-
     }
 
     private void SelectedTimePointOnPropertyChanging(object? sender, PropertyChangingEventArgs e)
@@ -367,7 +366,6 @@ public partial class ProfileSettingsWindow : MyWindow
         if (i > 0)
             ViewModel.SelectedTimePoint = timeLayout.Layouts[i - 1];
         SentrySdk.Metrics.Increment("views.ProfileSettingsWindow.timePoint.remove");
-
     }
 
     private async void ButtonDeleteTimeLayout_OnClick(object sender, RoutedEventArgs e)
@@ -794,9 +792,9 @@ public partial class ProfileSettingsWindow : MyWindow
     private void MenuItemProfileDuplicate_OnClick(object sender, RoutedEventArgs e)
     {
         SentrySdk.Metrics.Increment("views.ProfileSettingsWindow.profile.duplicate");
-        var raw = Path.Combine(Services.ProfileService.ProfilePath, $"./Profiles/{ViewModel.SelectedProfile}");
+        var raw = Path.Combine(Services.ProfileService.ProfilePath, $"{ViewModel.SelectedProfile}");
         var d = Path.GetFileNameWithoutExtension(ViewModel.SelectedProfile) + " - 副本.json";
-        var d1 = Path.Combine(Services.ProfileService.ProfilePath, $"./Profiles/{d}");
+        var d1 = Path.Combine(Services.ProfileService.ProfilePath, $"{d}");
         File.Copy(raw, d1);
         RefreshProfiles();
     }
@@ -943,7 +941,6 @@ public partial class ProfileSettingsWindow : MyWindow
     {
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
-
             ViewModel.IsDragEntering = true;
             e.Effects = DragDropEffects.Link;
         }
@@ -1014,7 +1011,6 @@ public partial class ProfileSettingsWindow : MyWindow
 
     private void ClassPlanGroupsSource_OnFilter(object sender, FilterEventArgs e)
     {
-
     }
 
     private void ButtonNewClassPlanGroups_OnClick(object sender, RoutedEventArgs e)
@@ -1094,7 +1090,6 @@ public partial class ProfileSettingsWindow : MyWindow
 
     private void MultiWeekRotation_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        
     }
 
     private void ButtonOpenWeekOffsetSettings_OnClick(object sender, RoutedEventArgs e)
@@ -1220,7 +1215,6 @@ public partial class ProfileSettingsWindow : MyWindow
 
     private void ButtonScheduleCalendarPrevMonth_OnClick(object sender, RoutedEventArgs e)
     {
-        
     }
 
     private void RefreshWeekScheduleRows()
@@ -1254,7 +1248,7 @@ public partial class ProfileSettingsWindow : MyWindow
         }
 
         ViewModel.DataGridWeekRowsWeekIndex =
-            (int)Math.Ceiling((baseDate - MainViewModel.Settings.SingleWeekStartTime).TotalDays / 7);
+            (int)Math.Ceiling((baseDate.AddDays(6) - MainViewModel.Settings.SingleWeekStartTime).TotalDays / 7);
 
         return;
 
@@ -1271,11 +1265,11 @@ public partial class ProfileSettingsWindow : MyWindow
     private void ButtonRefreshScheduleAdjustmentView_OnClick(object sender, RoutedEventArgs e)
     {
         RefreshWeekScheduleRows();
+        ScheduleCalendarControl.UpdateSchedule();
     }
 
     private void DataGridWeekSchedule_OnPreparingCellForEdit(object? sender, DataGridPreparingCellForEditEventArgs e)
     {
-        
     }
 
     private void DataGridWeekSchedule_OnBeginningEdit(object? sender, DataGridBeginningEditEventArgs e)
@@ -1357,6 +1351,7 @@ public partial class ProfileSettingsWindow : MyWindow
         }
 
         RefreshWeekScheduleRows();
+        ScheduleCalendarControl.UpdateSchedule();
     }
 
     private ClassPlan? GetTargetClassPlan(DateTime dateTime, bool overlay, out string? targetGuid)
@@ -1433,6 +1428,8 @@ public partial class ProfileSettingsWindow : MyWindow
         {
             targetClassPlan.Classes[index].IsChangedClass = true;
         }
+        RefreshWeekScheduleRows();
+        ScheduleCalendarControl.UpdateSchedule();
     }
 
     private void RootTabControlNavigator_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1441,5 +1438,10 @@ public partial class ProfileSettingsWindow : MyWindow
         {
             RefreshWeekScheduleRows();
         }
+    }
+
+    private void ButtonHideSellingAnnouncementBanner_OnClick(object sender, RoutedEventArgs e)
+    {
+        MainViewModel.Settings.ShowSellingAnnouncement = false;
     }
 }

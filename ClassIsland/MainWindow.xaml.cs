@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -49,7 +49,7 @@ using Linearstar.Windows.RawInput;
 using ProgressBar = System.Windows.Controls.ProgressBar;
 using WindowChrome = System.Windows.Shell.WindowChrome;
 using ClassIsland.Services.Management;
-
+using Point = System.Windows.Point;
 
 
 #if DEBUG
@@ -189,11 +189,11 @@ public partial class MainWindow : Window
         WindowRuleService = windowRuleService;
         ManagementService = managementService;
 
+        IAppHost.GetService<ISplashService>().SetDetailedStatus("正在初始化主界面（步骤 1/2）");
         SettingsService.PropertyChanged += (sender, args) =>
         {
             LoadSettings();
         };
-        TaskBarIconService.MainTaskBarIcon.TrayBalloonTipClicked += TaskBarIconOnTrayBalloonTipClicked;
         DataContext = this;
         LessonsService.PreMainTimerTicked += LessonsServiceOnPreMainTimerTicked;
         LessonsService.PostMainTimerTicked += LessonsServiceOnPostMainTimerTicked;
@@ -267,11 +267,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void TaskBarIconOnTrayBalloonTipClicked(object sender, RoutedEventArgs e)
-    {
-        App.GetService<SettingsWindowNew>().Open("update");
-    }
-
     private Storyboard BeginStoryboard(string name)
     {
         var a = (Storyboard)FindResource(name);
@@ -300,7 +295,6 @@ public partial class MainWindow : Window
         {
             Logger.LogError(ex, "无法更新鼠标状态。");
         }
-        
     }
 
     [Obsolete]
@@ -316,9 +310,8 @@ public partial class MainWindow : Window
         if (VisualTreeUtils.FindChildVisualByName<Grid>(this, "PART_GridWrapper") is not { } gridWrapper) 
             return new Point(0, 0);
         var p = gridWrapper.TranslatePoint(new Point(gridWrapper.ActualWidth / 2, gridWrapper.ActualHeight / 2), this);
-        p.Y = Top + ActualHeight / 2;
+        p.Y = Top + (ActualHeight / 2);
         return p;
-
     }
 
     private async Task ProcessNotification()
@@ -370,8 +363,7 @@ public partial class MainWindow : Window
                 ReCheckTopmostState();
             }
 
-            if (request.MaskDuration > TimeSpan.Zero &&
-                request.OverlayDuration > TimeSpan.Zero)
+            if (request.MaskDuration > TimeSpan.Zero)
             {
                 if (isSpeechEnabled)
                 {
@@ -403,14 +395,18 @@ public partial class MainWindow : Window
                 if (settings.IsNotificationEffectEnabled && ViewModel.Settings.AllowNotificationEffect &&
                     GridRoot.IsVisible && ViewModel.Settings.IsMainWindowVisible && !IsRunningCompatibleMode)
                 {
-                    TopmostEffectWindow.PlayEffect(new RippleEffect()
+                    var center = GetCenter();
+                    TopmostEffectWindow.Dispatcher.Invoke(() =>
                     {
-                        CenterX = GetCenter().X,
-                        CenterY = GetCenter().Y
+                        TopmostEffectWindow.PlayEffect(new RippleEffect()
+                        {
+                            CenterX = center.X,
+                            CenterY = center.Y
+                        });
                     });
                 }
                 await Task.Run(() => cancellationToken.WaitHandle.WaitOne(request.MaskDuration), cancellationToken);
-                if (request.OverlayContent is null || cancellationToken.IsCancellationRequested)
+                if (request.OverlayContent is null || cancellationToken.IsCancellationRequested || request.OverlayDuration <= TimeSpan.Zero)
                 {
                     BeginStoryboardInLine("OverlayMaskOutDirect");
                 }
@@ -429,7 +425,6 @@ public partial class MainWindow : Window
                         From = 1.0,
                         To = 0.0,
                         Duration = new Duration(request.OverlayDuration),
-
                     };
                     var storyboard = new Storyboard()
                     {
@@ -467,7 +462,9 @@ public partial class MainWindow : Window
     {
         if (DesignerProperties.GetIsInDesignMode(this))
             return;
+        IAppHost.GetService<ISplashService>().SetDetailedStatus("正在加载界面主题（2）");
         UpdateTheme();
+        IAppHost.GetService<ISplashService>().SetDetailedStatus("正在初始化托盘菜单");
         var menu = (ContextMenu)FindResource("AppContextMenu");
         menu.DataContext = this;
         TaskBarIconService.MainTaskBarIcon.DataContext = this;
@@ -477,10 +474,6 @@ public partial class MainWindow : Window
         ViewModel.OverlayRemainTimePercents = 0.5;
         WindowRuleService.ForegroundWindowChanged += WindowRuleServiceOnForegroundWindowChanged;
         DiagnosticService.EndStartup();
-        if (ViewModel.Settings.IsSplashEnabled)
-        {
-            App.GetService<ISplashService>().EndSplash();
-        }
 
         if (!ViewModel.Settings.IsNotificationEffectRenderingScaleAutoSet)
         {
@@ -489,6 +482,10 @@ public partial class MainWindow : Window
 
         if (!ViewModel.Settings.IsWelcomeWindowShowed)
         {
+            if (ViewModel.Settings.IsSplashEnabled)
+            {
+                App.GetService<ISplashService>().EndSplash();
+            }
             var w = new WelcomeWindow()
             {
                 ViewModel =
@@ -510,6 +507,7 @@ public partial class MainWindow : Window
 
         UriNavigationService.HandleAppNavigation("class-swap", args => OpenClassSwapWindow());
 
+        IAppHost.GetService<ISplashService>().SetDetailedStatus("正在初始化输入");
         if (SettingsService.Settings.UseRawInput)
         {
             try
@@ -563,13 +561,10 @@ public partial class MainWindow : Window
         var handle = new WindowInteropHelper(this).Handle;
         if (ViewModel.IsNotificationWindowExplicitShowed || ViewModel.Settings.WindowLayer == 1)
         {
-
             SetWindowPos((HWND)handle, NativeWindowHelper.HWND_TOPMOST, 0, 0, 0, 0,
                 SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_NOSENDCHANGING);
             //Topmost = true;
-            
         }
-
     }
 
     private void InitializeRawInputHandler()
@@ -583,7 +578,6 @@ public partial class MainWindow : Window
         RawInputUpdateStopWatch.Start();
         var hWndSource = HwndSource.FromHwnd(handle);
         hWndSource?.AddHook(ProcWnd);
-        
     }
 
     private void ProcessMousePos(object? sender, EventArgs e)
@@ -729,6 +723,7 @@ public partial class MainWindow : Window
         LoadSettings();
         //ViewModel.CurrentProfilePath = ViewModel.Settings.SelectedProfile;
         LoadProfile();
+        IAppHost.GetService<ISplashService>().SetDetailedStatus("正在加载界面主题（1）");
         UpdateTheme();
         UserPrefrenceUpdateStopwatch.Start();
         SystemEvents.UserPreferenceChanged += OnSystemEventsOnUserPreferenceChanged;
@@ -805,7 +800,6 @@ public partial class MainWindow : Window
                     Logger.LogError(ex, "获取系统主题色失败。");
                 }
                 break;
-
         }
         ThemeService.SetTheme(ViewModel.Settings.Theme, primary, secondary);
 
@@ -943,6 +937,8 @@ public partial class MainWindow : Window
             : Screen.PrimaryScreen;
         if (screen == null)
             return;
+        double offsetAreaTop = ViewModel.Settings.IsIgnoreWorkAreaEnabled ? screen.Bounds.Top : screen.WorkingArea.Top;
+        double offsetAreaBottom = ViewModel.Settings.IsIgnoreWorkAreaEnabled ? screen.Bounds.Bottom : screen.WorkingArea.Bottom;
         var aw = RenderSize.Width * dpiX;
         var ah = RenderSize.Height * dpiY;
         var c = (double)(screen.WorkingArea.Left + screen.WorkingArea.Right) / 2;
@@ -956,31 +952,37 @@ public partial class MainWindow : Window
         {
             case 0: //左上
                 //Left = (screen.WorkingArea.Left + ox) / dpiX;
-                Top = (screen.WorkingArea.Top + oy) / dpiY;
+                Top = (offsetAreaTop + oy) / dpiY;
                 break;
             case 1: // 中上
                 //Left = (c - aw / 2 + ox) / dpiX;
-                Top = (screen.WorkingArea.Top + oy) / dpiY;
+                Top = (offsetAreaTop + oy) / dpiY;
                 break;
             case 2: // 右上
                 //Left = (screen.WorkingArea.Right - aw + ox) / dpiX;
-                Top = (screen.WorkingArea.Top + oy) / dpiY;
+                Top = (offsetAreaTop + oy) / dpiY;
                 break;
             case 3: // 左下
                 //Left = (screen.WorkingArea.Left + ox) / dpiX;
-                Top = (screen.WorkingArea.Bottom - ah + oy) / dpiY;
+                Top = (offsetAreaBottom - ah + oy) / dpiY;
                 break;
             case 4: // 中下
                 //Left = (c - aw / 2 + ox) / dpiX;
-                Top = (screen.WorkingArea.Bottom - ah + oy) / dpiY;
+                Top = (offsetAreaBottom - ah + oy) / dpiY;
                 break;
             case 5: // 右下
                 //Left = (screen.WorkingArea.Right - aw + ox) / dpiX;
-                Top = (screen.WorkingArea.Bottom - ah + oy) / dpiY;
+                Top = (offsetAreaBottom - ah + oy) / dpiY;
                 break;
         }
+
         if (updateEffectWindow)
-            TopmostEffectWindow.UpdateWindowPos(screen, 1 / dpiX);
+        {
+            TopmostEffectWindow.Dispatcher.Invoke(() =>
+            {
+                TopmostEffectWindow.UpdateWindowPos(screen, 1 / dpiX);
+            });
+        }
     }
 
     public void GetCurrentDpi(out double dpiX, out double dpiY, Visual? visual=null)
@@ -1177,7 +1179,6 @@ public partial class MainWindow : Window
 
     private void TrayIconOnClicked_OnExecuted(object sender, ExecutedRoutedEventArgs e)
     {
-        
     }
 
     private void MenuItemSettingsWindow2_OnClick(object sender, RoutedEventArgs e)
