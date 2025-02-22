@@ -105,7 +105,7 @@ $globalIndex.Versions.Add(@{
     Version = $version
     Title = $version
     Channels = $tagInfo.Channels
-    VersionInfoUrl = "https://get.classisland.tech/p/ClassIsland-Ningbo-S3/classisland/disturb/${version}/index.json"
+    VersionInfoUrl = "https://get.classisland.tech/p/ClassIsland-Ningbo-S3/classisland/disturb-net6/${version}/index.json"
 })
 ConvertTo-Json $globalIndex -Depth 99 | Out-File ./metadata/disturb-net6/index.json
 git add .
