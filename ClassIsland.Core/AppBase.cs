@@ -21,6 +21,12 @@ public abstract class AppBase : Application, IAppHost
     public abstract void Restart(bool quiet=false);
 
     /// <summary>
+    /// 重启应用程序。
+    /// </summary>
+    /// <param name="parameters">重启应用时使用的参数</param>
+    public abstract void Restart(string[] parameters);
+
+    /// <summary>
     /// 停止当前应用程序。
     /// </summary>
     public abstract void Stop();
@@ -57,9 +63,19 @@ public abstract class AppBase : Application, IAppHost
     public string PackagingType => IsMsix ? "msix" : "singleFile";
 
     /// <summary>
+    /// 应用二进制文件的平台架构
+    /// </summary>
+    public abstract string Platform { get; }
+
+    /// <summary>
+    /// 应用二进制文件面向的操作系统
+    /// </summary>
+    public abstract string OperatingSystem { get; }
+
+    /// <summary>
     /// 应用分发频道
     /// </summary>
-    public string AppSubChannel => $"windows_x64_{(IsAssetsTrimmed() ? "trimmed" : "full")}_{PackagingType}";
+    public string AppSubChannel => $"{OperatingSystem}_{Platform}_{(IsAssetsTrimmed() ? "trimmed" : "full")}_{PackagingType}";
 
     internal AppBase()
     {

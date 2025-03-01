@@ -79,6 +79,7 @@ using Windows.Storage;
 using ClassIsland.Services.Automation.Triggers;
 using ClassIsland.Controls.TriggerSettingsControls;
 using ClassIsland.Models.Automation.Triggers;
+using ClassIsland.Shared.Helpers;
 using MahApps.Metro.Controls;
 using Walterlv.Threading;
 using Walterlv.Windows;
@@ -89,6 +90,8 @@ namespace ClassIsland;
 /// </summary>
 public partial class App : AppBase, IAppHost
 {
+    internal Dispatcher? ThreadedUiDispatcher { get; set; }
+
     public static bool IsAssetsTrimmedInternal { get; } =
 #if TrimAssets 
         true;
@@ -155,6 +158,22 @@ public partial class App : AppBase, IAppHost
 #endif
     ;
 
+    public override string OperatingSystem => "windows";
+    public override string Platform =>
+#if TARGET_x64
+    "x64"
+#elif PLATFORM_x86
+    "x86"
+#elif PLATFORM_ARM64
+    "arm64"
+#elif PLATFORM_ARM
+    "arm"
+#elif PLATFORM_Any
+    "any"
+#else
+    "unknown"
+#endif
+        ;
     public App()
     {
         //AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
@@ -335,6 +354,40 @@ public partial class App : AppBase, IAppHost
             CommonDialog.ShowError("运行ClassIsland需要开启Aero效果。请在【控制面板】->【个性化】中启用Aero主题，然后再尝试运行ClassIsland。");
             Environment.Exit(0);
         }
+
+        var startupCountFilePath = Path.Combine(AppRootFolderPath, ".startup-count");
+        var startupCount = File.Exists(startupCountFilePath)
+            ? (int.TryParse(await File.ReadAllTextAsync(startupCountFilePath), out var count) ? count + 1 : 1)
+            : 1;
+        if (startupCount >= 3 && !ApplicationCommand.Recovery)
+        {
+            var enterRecovery = new CommonDialogBuilder()
+                .SetIconKind(CommonDialogIconKind.Hint)
+                .SetContent("ClassIsland 多次启动失败，您需要进入恢复模式以尝试修复 ClassIsland 吗？")
+                .AddCancelAction()
+                .AddAction("进入恢复模式", PackIconKind.WrenchCheckOutline, true)
+                .ShowDialog();
+            if (enterRecovery == 1)
+            {
+                ApplicationCommand.Recovery = true;
+            }
+        }
+        if (ApplicationCommand.Recovery)
+        {
+            if (File.Exists(startupCountFilePath))
+            {
+                File.Delete(startupCountFilePath);
+            }
+            
+            var recoveryWindow = new RecoveryWindow();
+            recoveryWindow.Show();
+            transaction.Finish();
+            return;
+        }
+
+        
+        await File.WriteAllTextAsync(startupCountFilePath, startupCount.ToString());
+
         var spanProcessUpdate = spanPreInit.StartChild("startup-process-update");
 
         if (ApplicationCommand.UpdateReplaceTarget != null)
@@ -442,6 +495,7 @@ public partial class App : AppBase, IAppHost
                 });
                 services.AddTransient<ClassPlanDetailsWindow>();
                 services.AddTransient<WindowRuleDebugWindow>();
+                services.AddTransient<ConfigErrorsWindow>();
                 // 设置页面
                 services.AddSettingsPage<GeneralSettingsPage>();
                 services.AddSettingsPage<ComponentsSettingsPage>();
@@ -589,6 +643,15 @@ public partial class App : AppBase, IAppHost
         }
         spanLoadingSettings.Finish();
         //OverrideFocusVisualStyle();
+        var threadedUiDispatcherAwaiter =
+            AsyncBox.RelatedAsyncDispatchers.GetOrAdd(Dispatcher, dispatcher => UIDispatcher.RunNewAsync("AsyncBox"));
+        await Task.Run(() =>
+        {
+            while (!threadedUiDispatcherAwaiter.IsCompleted)
+            {
+            }
+        });
+        ThreadedUiDispatcher = threadedUiDispatcherAwaiter.Result;
         Logger.LogInformation("初始化应用。");
 
         TransitionAssist.DisableTransitionsProperty.OverrideMetadata(typeof(FrameworkElement), new FrameworkPropertyMetadata(Settings.IsTransientDisabled));
@@ -597,11 +660,8 @@ public partial class App : AppBase, IAppHost
         if (Settings.IsSplashEnabled && !ApplicationCommand.Quiet)
         {
             var spanShowSplash = spanLaunching.StartChild("startup-show-splash");
-            var splashDispatcherAwaiter = AsyncBox.RelatedAsyncDispatchers.GetOrAdd(Dispatcher, dispatcher => UIDispatcher.RunNewAsync("AsyncBox"));
-            while (!splashDispatcherAwaiter.IsCompleted)
-            {
-            }
-            splashDispatcherAwaiter.Result.Invoke(() =>
+
+            ThreadedUiDispatcher.Invoke(() =>
             {
                 GetService<SplashWindow>().Show();
             });
@@ -681,6 +741,11 @@ public partial class App : AppBase, IAppHost
             SentrySdk.ConfigureScope(s => s.Transaction = null);
             GetService<IAutomationService>();
             GetService<IRulesetService>().NotifyStatusChanged();
+            File.Delete(startupCountFilePath);
+            if (ConfigureFileHelper.Errors.FirstOrDefault(x => x.Critical) != null)
+            {
+                GetService<ITaskBarIconService>().ShowNotification("配置文件损坏", "ClassIsland 部分配置文件已损坏且无法加载，这些配置文件已恢复至默认值。点击此消息以查看详细信息和从过往备份中恢复配置文件。", clickedCallback:() => GetService<IUriNavigationService>().NavigateWrapped(new Uri("classisland://app/config-errors")));
+            }
             if (Settings.IsSplashEnabled)
             {
                 App.GetService<ISplashService>().EndSplash();
@@ -703,6 +768,7 @@ public partial class App : AppBase, IAppHost
         uriNavigationService.HandleAppNavigation("profile", args => GetService<MainWindow>().OpenProfileSettingsWindow());
         uriNavigationService.HandleAppNavigation("helps", args => uriNavigationService.Navigate(new Uri("https://docs.classisland.tech/app/")));
         uriNavigationService.HandleAppNavigation("profile/import-excel", args => GetService<ExcelImportWindow>().Show());
+        uriNavigationService.HandleAppNavigation("config-errors", args => GetService<ConfigErrorsWindow>().ShowDialog());
 
         GetService<IIpcService>().IpcProvider.CreateIpcJoint<IFooService>(new FooService());
         try
@@ -723,13 +789,7 @@ public partial class App : AppBase, IAppHost
 
     private TopmostEffectWindow BuildTopmostEffectWindow(IServiceProvider x)
     {
-        
-        var windowDispatcherAwaiter = AsyncBox.RelatedAsyncDispatchers.GetOrAdd(Dispatcher, dispatcher => UIDispatcher.RunNewAsync("AsyncBox"));
-        while (!windowDispatcherAwaiter.IsCompleted)
-        {
-        }
-
-        return windowDispatcherAwaiter.Result.Invoke(() =>
+        return ThreadedUiDispatcher!.Invoke(() =>
         {
             var window = new TopmostEffectWindow(x.GetRequiredService<ILogger<TopmostEffectWindow>>(), x.GetRequiredService<SettingsService>());
             return window;
@@ -906,16 +966,26 @@ public partial class App : AppBase, IAppHost
 
     public override void Restart(bool quiet=false)
     {
+        if (quiet)
+        {
+            Restart(["-m", "-q"]);
+        }
+        else
+        {
+            Restart(["-m"]);
+        }
+        
+    }
+
+    public override void Restart(string[] parameters)
+    {
         Stop();
         var path = Environment.ProcessPath;
-        var args = new List<string> { "-m" };
-        if (quiet)
-            args.Add("-q");
-        if (path == null) 
+        if (path == null)
             return;
         var replaced = path.Replace(".dll", ".exe");
         var startInfo = new ProcessStartInfo(replaced);
-        foreach (var i in args)
+        foreach (var i in parameters)
         {
             startInfo.ArgumentList.Add(i);
         }

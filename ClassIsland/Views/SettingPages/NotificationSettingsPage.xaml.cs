@@ -86,8 +86,7 @@ public partial class NotificationSettingsPage : SettingsPageBase
             GptSoVitsPort = "80",
             GptSoVitsPromptText = "这里有别于神里家的布景，移步之间，处处都有新奇感。",
             GptSoVitsRefAudioPath = "template_audio/ayaka.wav"
-        }
-        ,
+        },
         new GptSoVitsSpeechSettings
         {
             PresetName = "爱莉希雅（崩坏3）",
@@ -98,6 +97,51 @@ public partial class NotificationSettingsPage : SettingsPageBase
             GptSoVitsPort = "80",
             GptSoVitsPromptText = "他这么向我说道，悲剧并非终结，而是希望的起始。",
             GptSoVitsRefAudioPath = "template_audio/elysia.wav"
+        },
+        new GptSoVitsSpeechSettings
+        {
+            PresetName = "钟离（原神）",
+            GptSoVitsVoiceName = "zhongli",
+            IsInternal = true,
+            GptSoVitsServerIp = "zhongli.tts.wez.ink",
+            GptSoVitsBatchSize = 5,
+            GptSoVitsPort = "80",
+            GptSoVitsPromptText = "无事逢客休，席上校两棋…我们开局吧。",
+            GptSoVitsRefAudioPath = "template_audio/zhongli.wav"
+        },
+        new GptSoVitsSpeechSettings
+        {
+            PresetName = "流萤（崩坏：星穹铁道）",
+            GptSoVitsVoiceName = "firefly",
+            IsInternal = true,
+            GptSoVitsServerIp = "firefly.tts.wez.ink",
+            GptSoVitsBatchSize = 5,
+            GptSoVitsPort = "80",
+            GptSoVitsPromptText = "因为你身上别着星穹列车的徽章呀，我在大银幕上见过！",
+            GptSoVitsRefAudioPath = "template_audio/firefly.wav"
+        },
+        new GptSoVitsSpeechSettings
+        {
+            PresetName = "高考听力男声",
+            GptSoVitsVoiceName = "highexam-male",
+            IsInternal = true,
+            GptSoVitsServerIp = "highexam-male.tts.wez.ink",
+            GptSoVitsBatchSize = 5,
+            GptSoVitsPort = "80",
+            GptSoVitsPromptText = "回答听力部分时，请先将答案标在试卷上。",
+            GptSoVitsRefAudioPath = "template_audio/highexam-male.wav"
+        }
+        ,
+        new GptSoVitsSpeechSettings
+        {
+            PresetName = "三月七（崩坏：星穹铁道）",
+            GptSoVitsVoiceName = "march7th",
+            IsInternal = true,
+            GptSoVitsServerIp = "march7th.tts.wez.ink",
+            GptSoVitsBatchSize = 5,
+            GptSoVitsPort = "80",
+            GptSoVitsPromptText = "名字是我自己取的，大家也叫我三月、小三月…你呢？你想叫我什么？",
+            GptSoVitsRefAudioPath = "template_audio/march7th.wav"
         }
         ];        
 

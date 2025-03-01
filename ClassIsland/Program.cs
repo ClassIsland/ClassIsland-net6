@@ -37,10 +37,18 @@ var command = new RootCommand
     new Option<string>(["-externalPluginPath", "-epp"], "外部插件路径"),
     new Option<bool>(["--enableSentryDebug", "-esd"], "启用 Sentry 调试"),
     new Option<bool>(["--verbose", "-v"], "启用详细输出"),
-    new Option<bool>(["--showOssWatermark", "-ossw"], "显示开源地址水印")
+    new Option<bool>(["--showOssWatermark", "-ossw"], "显示开源地址水印"),
+    new Option<bool>(["--recovery", "-r"], "启动时进入恢复模式"),
+    new Option<bool>(["--diagnostic", "-d"], "启用诊断模式"),
+    new Option<bool>(["--safe", "-s"], "启用安全模式"),
 };
 command.Handler = CommandHandler.Create((ApplicationCommand c) => { App.ApplicationCommand = c; });
 command.Invoke(args);
+
+if (App.ApplicationCommand.Diagnostic)
+{
+    AllocConsole();
+}
 
 var mutex = new Mutex(true, "ClassIsland.Lock", out var createNew);
 
@@ -80,6 +88,7 @@ void ConfigureSentry(SentryOptions options)
     // This option is recommended. It enables Sentry's "Release Health" feature.
     options.AutoSessionTracking = true;
     options.Release = App.AppVersion;
+    options.SendClientReports = false;
     // Enabling this option is recommended for client applications only. It ensures all threads use the same global scope.
     options.IsGlobalModeEnabled = true;
     // Example sample rate for your transactions: captures 10% of transactions
@@ -90,11 +99,10 @@ void ConfigureSentry(SentryOptions options)
     }
     else
     {
-        options.TracesSampleRate = 0.1;
+        options.TracesSampleRate = 0.05;
         // options.ProfilesSampleRate = 0.016;
     }
 
-    options.AutoSessionTracking = true;
     options.ExperimentalMetrics = new ExperimentalMetricsOptions { EnableCodeLocations = true };
 }
 
