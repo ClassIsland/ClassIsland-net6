@@ -20,14 +20,11 @@
 
 	<ItemGroup>
 		<Folder Include="Properties\" />
+		<None Include="ClassIsland.PluginSdk.targets" Pack="True" PackagePath="build/net8.0" />
+		<None Include="generate-md5.ps1" Pack="True" PackagePath="build/net8.0" />
 	</ItemGroup>
 	
 	<Import Project="..\GeneratePackage.props" />
 	<Import Project="..\Global.props" />
-	<ItemGroup>
-	  <PackageReference Update="GitInfo" Version="3.3.5">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	</ItemGroup>
+	<Import Project=".\ClassIsland.PluginSdk.targets" />
 </Project>
