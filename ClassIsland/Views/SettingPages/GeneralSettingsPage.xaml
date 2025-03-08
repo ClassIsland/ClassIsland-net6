@@ -23,7 +23,9 @@
       TextElement.FontSize="14"
       TextOptions.TextFormattingMode="Ideal"
       TextOptions.TextRenderingMode="Auto"
-      d:DataContext="{d:DesignInstance local:GeneralSettingsPage}">
+      d:DataContext="{d:DesignInstance local:GeneralSettingsPage}"
+      Loaded="GeneralSettingsPage_OnLoaded"
+      Unloaded="GeneralSettingsPage_OnUnloaded">
 
     <controls:SettingsPageBase.Resources>
         <converters:MiniInfoGuidToMiniInfoProviderMultiConverter x:Key="MiniInfoGuidToMiniInfoProviderMultiConverter" />
@@ -57,6 +59,17 @@
                     </Button>
                 </StackPanel>
             </materialDesign:ColorZone>
+
+            <!-- Announcements -->
+            <ItemsControl ItemsSource="{Binding AnnouncementService.Announcements, Mode=OneWay}"
+                          Margin="0 0 0 8"
+                          Visibility="{Binding HasItems, RelativeSource={RelativeSource Self}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ci:AnnouncementControl Announcement="{Binding}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
             <controls1:IconText Kind="LightningBoltOutline" Text="行为" Margin="0 0 0 8" />
             <!-- 开机自启 -->

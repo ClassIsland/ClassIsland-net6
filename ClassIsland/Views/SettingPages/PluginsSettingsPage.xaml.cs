@@ -27,6 +27,7 @@ using ClassIsland.Core.Helpers;
 using ClassIsland.Core.Models.Plugin;
 using ClassIsland.Services;
 using ClassIsland.ViewModels.SettingsPages;
+using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using Sentry;
@@ -62,8 +63,7 @@ public partial class PluginsSettingsPage : SettingsPageBase
         PluginService = pluginService;
         PluginMarketService = pluginMarketService;
         SettingsService = settingsService;
-        ViewModel.PropertyChanged += ViewModelOnPropertyChanged;
-        PluginMarketService.RestartRequested += (sender, args) => RequestRestart();
+        
         if (DateTime.Now - SettingsService.Settings.LastRefreshPluginSourceTime >= TimeSpan.FromDays(7))
         {
             _ = PluginMarketService.RefreshPluginSourceAsync();
@@ -244,7 +244,13 @@ public partial class PluginsSettingsPage : SettingsPageBase
     {
         if (ViewModel.SelectedPluginInfo == null)
             return;
-        PluginMarketService.RequestDownloadPlugin(ViewModel.SelectedPluginInfo.Manifest.Id);
+        InstallPlugin(ViewModel.SelectedPluginInfo.Manifest.Id);
+    }
+
+    [RelayCommand]
+    private void InstallPlugin(string id)
+    {
+        PluginMarketService.RequestDownloadPlugin(id);
     }
 
     private void MenuItemReloadFromCache_OnClick(object sender, RoutedEventArgs e)
@@ -402,5 +408,22 @@ public partial class PluginsSettingsPage : SettingsPageBase
     private void Grid_DragLeave(object sender, DragEventArgs e)
     {
         ViewModel.IsDragEntering = false;
+    }
+
+    private void PluginsSettingsPage_OnLoaded(object sender, RoutedEventArgs e)
+    {
+        ViewModel.PropertyChanged += ViewModelOnPropertyChanged;
+        PluginMarketService.RestartRequested += OnPluginMarketServiceOnRestartRequested;
+    }
+
+    private void OnPluginMarketServiceOnRestartRequested(object? sender, EventArgs args)
+    {
+        RequestRestart();
+    }
+
+    private void PluginsSettingsPage_OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        ViewModel.PropertyChanged -= ViewModelOnPropertyChanged;
+        PluginMarketService.RestartRequested -= OnPluginMarketServiceOnRestartRequested;
     }
 }
