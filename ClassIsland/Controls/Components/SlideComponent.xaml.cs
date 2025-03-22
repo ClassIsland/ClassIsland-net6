@@ -132,6 +132,20 @@ public partial class SlideComponent
         CreateRandomPlaylist();
     }
 
+    private static T[] ShuffleCopy<T>(IEnumerable<T> data, Random r)
+    {
+        var arr = data.ToArray();
+
+        for (var i = arr.Length - 1; i > 0; --i)
+        {
+            var randomIndex = r.Next(i + 1);
+
+            (arr[i], arr[randomIndex]) = (arr[randomIndex], arr[i]);
+        }
+
+        return arr;
+    }
+
     private void CreateRandomPlaylist()
     {
         if (Settings.Children.Count <= 0)
@@ -145,7 +159,7 @@ public partial class SlideComponent
             list[i] = i;
         }
         Random rand = new();
-        rand.Shuffle(list);
+        list = ShuffleCopy(list, rand);
         foreach (var i in list)
         {
             _randomPlaylist.Enqueue(i);
